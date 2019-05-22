@@ -39,7 +39,11 @@ int main(int argc, char *argv[])
 	gstScene scene;
 	gstSeparator *root = new gstSeparator();
 	
-	gstSeparator *vrlmSep = gstReadVRMLFile("dinoborg.wrl");
+	gstSeparator *vrlmSep = gstReadVRMLFile("untitled.wrl");
+	vrlmSep->scale(20.0);
+
+	cout << "Place the PHANToM in its reset position and press <ENTER>." << endl;
+	cin.get();
 
 	gstPHANToM *phantom = new gstPHANToM("Default PHANToM");
 	if(!phantom || !phantom->getValidConstruction()) {
@@ -49,6 +53,7 @@ int main(int argc, char *argv[])
 
 
 	scene.setRoot(root);
+	
 	root->addChild(vrlmSep);
 	root->addChild(phantom);
 
@@ -67,18 +72,25 @@ int main(int argc, char *argv[])
 
 	
 
-/*	bool endFlag = false;
+	bool endFlag = false;
 
-	while(!scene->getDoneServoLoop()) {
+	gstPoint currentPoint;
+
+	//glutManager->startMainloop();
+
+	while(!scene.getDoneServoLoop()) {
 		//blalbalbalblabla
 		
+		currentPoint = phantom->getPosition_WC();
+		currentPoint.printSelf();
+
 		if(endFlag)	
 		{
-			scene->stopServoLoop();
+			break;
 		}
-	}*/
+	}
 
-	glutManager->startMainloop();
+	scene.stopServoLoop();
 
     return 0;
 }
