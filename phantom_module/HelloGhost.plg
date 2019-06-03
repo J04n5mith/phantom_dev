@@ -6,27 +6,27 @@
 --------------------Configuration: HelloGhost - Win32 Debug--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSPBF.tmp" with contents
+Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSPE4.tmp" with contents
 [
 /nologo /MDd /W3 /Gm /GX /Zi /Od /I "C:\Programme\SensAble\GHOST\v3.1\include" /I "C:\Programme\SensAble\GHOST\v3.1\external\stl" /I "C:\Programme\SensAble\GHOST\v3.1\external\glut" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"Debug/" /Fp"Debug/HelloGhost.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
 "C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp"
 ]
-Creating command line "cl.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSPBF.tmp" 
-Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSPC0.tmp" with contents
+Creating command line "cl.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSPE4.tmp" 
+Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSPE5.tmp" with contents
 [
 ghost31.lib gstVRML31.lib ghostGLUTManager.lib glut32.lib ghostGLManager.lib HapticView.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/HelloGhost.pdb" /debug /machine:I386 /out:"Debug/HelloGhost.exe" /pdbtype:sept /libpath:"C:\Programme\SensAble\GHOST\v3.1\lib" /libpath:"C:\Programme\SensAble\GHOST\v3.1\external\glut" 
 ".\Debug\HelloGhost.obj"
 ]
-Creating command line "link.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSPC0.tmp"
+Creating command line "link.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSPE5.tmp"
 <h3>Output Window</h3>
 Compiling...
 HelloGhost.cpp
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(125) : warning C4101: 'input' : unreferenced local variable
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(124) : warning C4101: 'msg' : unreferenced local variable
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(126) : warning C4101: 'vector3' : unreferenced local variable
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(166) : warning C4700: local variable 'res' used without having been initialized
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(205) : warning C4700: local variable 'res' used without having been initialized
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(226) : warning C4700: local variable 'recv_msg' used without having been initialized
+C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(143) : warning C4101: 'input' : unreferenced local variable
+C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(142) : warning C4101: 'msg' : unreferenced local variable
+C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(144) : warning C4101: 'vector3' : unreferenced local variable
+C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(184) : warning C4700: local variable 'res' used without having been initialized
+C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(223) : warning C4700: local variable 'res' used without having been initialized
+C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(244) : warning C4700: local variable 'recv_msg' used without having been initialized
 Linking...
 Creating command line "bscmake.exe /nologo /o"Debug/HelloGhost.bsc"  ".\Debug\HelloGhost.sbr""
 Creating browse info file...

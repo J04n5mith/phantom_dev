@@ -55,6 +55,7 @@
   <ItemGroup>
      <Compile Include="Assets\MoveBehaviour.cs" />
      <Compile Include="Assets\OBJExport\OBJExporter.cs" />
+     <Compile Include="Assets\PhantomTalker.cs" />
      <Compile Include="Assets\UDPListener.cs" />
      <Compile Include="Assets\unityx3d.cs" />
  <Reference Include="UnityEditor.StandardEvents">

@@ -6,24 +6,28 @@ using System.Net.Sockets;
 using System.Net;
 using System.Linq;
 
-public class UDPListener
+public class PhantomListener
 {
     private int m_portToListen = 8080;
     private volatile bool listening;
     Thread m_ListeningThread;
     UdpClient listener;
     Logger logger;
+    PhantomData data;
 
     public Vector3 ReceivedVector { get { return receivedVector; } }
     private Vector3 receivedVector;
 
+    public double ScaleFactor{get; set;}
     //constructor
-    public UDPListener(Logger logger)
+    public PhantomListener(PhantomData data, Logger logger)
     {
         this.logger = logger;
         this.listening = false;
         receivedVector = new Vector3();
         receivedVector.Set(0, 0, 0);
+        this.ScaleFactor = 20.0;
+        this.data = data;
     }
 
     public void StartListener(int exceptedMessageLength)
@@ -73,15 +77,9 @@ public class UDPListener
 
                     byte[] bytes = listener.Receive(ref groupEP);
 
-
-                    for (int i = 0; i < receivedDoubles.Length; i++)
-                    {
-                        receivedDoubles[i] = BitConverter.ToDouble(bytes, i*8);
-                    }
+                    receivedDoubles = ParseVector(bytes);
                     
-                    //Set the new Vector (x,y,z) - z need to be inverted
-                    receivedVector.Set((float)(receivedDoubles[0]/20), (float)(receivedDoubles[1]/20), (float)(-(receivedDoubles[2]/20)));
-                    
+                    data.SetPhantomMousePoint(receivedDoubles[0], receivedDoubles[1], receivedDoubles[2]);
                 }
             }
             catch (Exception e)
@@ -96,6 +94,17 @@ public class UDPListener
         }
     }
 
+    public double[] ParseVector(byte[] bytes)
+    {
+        double[] receivedDoubles = new double[3];
+
+        for (int i = 0; i < receivedDoubles.Length; i++)
+        {
+            receivedDoubles[i] = BitConverter.ToDouble(bytes, i*8);
+        }
+    }
+
     
 }
+
 

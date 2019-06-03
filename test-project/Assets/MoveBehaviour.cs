@@ -8,8 +8,11 @@ using UnityX3D;
 
 public class MoveBehaviour : MonoBehaviour
 {
-    UDPListener listener;
-    GameObject player;
+    PhantomListener listener;
+    PhantomTalker talker;
+    PhantomData data;
+    GameObject mouse;
+    GameObject[] objects;
     Logger logger;
 
     // Start is called before the first frame update
@@ -18,13 +21,16 @@ public class MoveBehaviour : MonoBehaviour
         logger = new Logger(new MyLogHandler());
 
         logger.Log("Starting application");
-        
-        listener = new UDPListener(logger);
+        data = new PhantomData();
+        listener = new PhantomListener(data, logger);
+        talker = new PhantomTalker(data, logger);
         listener.StartListener(1024);
         logger.Log("UDP Listener initialized");
         
 
-        player = GameObject.FindGameObjectWithTag("Player");
+        mouse = GameObject.FindGameObjectWithTag("Player");
+
+        objects = GameObject.FindGameObjectWithTag("Untagged");
     }
 
 
@@ -32,7 +38,15 @@ public class MoveBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        player.transform.position = listener.ReceivedVector;
+        mouse.transform.position = data.MousePosition;
+        
+        for (int i = 0; i < objects.Length; i++)
+        {
+            if(objects[i].transform.hasChanged)
+            {
+                talker.SendLocationOfGameObjects(i, objects[i].transform.position);
+            }
+        }
     }
 
     private void OnApplicationQuit()

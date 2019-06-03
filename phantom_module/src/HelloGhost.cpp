@@ -91,6 +91,10 @@ int main(int argc, char *argv[])
 	}
 
 
+
+	
+	//phantom->setCenter(newCenter);
+
 	scene.setRoot(root);
 	
 	root->addChild(vrmlSep);
@@ -105,27 +109,41 @@ int main(int argc, char *argv[])
 	}
 	scene.startServoLoop();
 	// create an instance of the GLUT OpenGL Manager
-	//ghostGLUTManager *glutManager = ghostGLUTManager::CreateInstance(argc, argv, "gstTriPolyMesh Example");
+	ghostGLUTManager *glutManager = ghostGLUTManager::CreateInstance(argc, argv, "gstTriPolyMesh Example");
 
-	//glutManager->loadScene(&scene);
-	char *name = "Cylinder";
+
+
+	glutManager->loadScene(&scene);
+	/*char *name = "Cylinder";
 	gstType *node = vrmlSep->getTypeId();
 	name = (char *)node->getName();
-	cout << "Name of node " << name << endl;
+	cout << "Name of node " << name << endl;*/
 	
+	const gstPoint newCenter = new gstPoint(40, 0, 0);
+	
+	gstTransform *shape = vrmlSep->getChild(2);
+	shape->setPosition_WC(newCenter);
+
+	gstPoint bla = phantom->getPosition_WC();
+	bla.printSelf();
+	
+	
+	//const gstTransform *phantomtrans = mani->getNode();
+
+	//phantomtrans->setCenter(newCenter);
 	
 	bool endFlag = false;
 
 	gstPoint currentPoint;
 
-	//glutManager->startMainloop();
+	glutManager->startMainloop();
 	
 	
 	char msg[1024];
 	char *input;
 	const double * vector3;
 	signal(SIGINT, inthand);
-	scene.startServoLoop();
+	//scene.startServoLoop();
 	
 	/*while(!stop) {
 
