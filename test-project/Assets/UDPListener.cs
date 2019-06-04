@@ -102,6 +102,7 @@ public class PhantomListener
         {
             receivedDoubles[i] = BitConverter.ToDouble(bytes, i*8);
         }
+	return receivedDoubles;
     }
 
     

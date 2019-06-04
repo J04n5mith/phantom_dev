@@ -89,6 +89,22 @@ LINK32=link.exe
 
 SOURCE=.\src\HelloGhost.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\MutexClass.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\UnityListener.cpp
+# End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\MutexClass.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\UnityListener.h
+# End Source File
 # End Target
 # End Project

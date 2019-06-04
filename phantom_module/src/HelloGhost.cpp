@@ -31,22 +31,19 @@
 
 #include <process.h>
 
+#include "../UnityListener.h"
+
 #pragma comment (lib, "Ws2_32.lib")
 
 #define DEFAULT_BULEN 1024
 #define SERVER "192.168.122.1"
-#define RECEIVER_PORT 8085
 #define SENDER_PORT 8080
 
 struct sockaddr_in si_other_send;
 int connectSocketSend, slen_send=sizeof(si_other_send), iResultSend;
 WSADATA wsaDataSend;
 
-struct sockaddr_in si_other_recv;
-int connectSocketRecv, slen_recv=sizeof(si_other_recv), iResultRecv;
-WSADATA wsaDataRecv;
-
-
+int id;
 
 int recvbuflen;
 char *sendbuf;
@@ -59,7 +56,6 @@ void inthand(int signum) {
 
 int initSendNetwork();
 int receiveProcessingData();
-unsigned int __stdcall receiverThread(void*);
 
 
 int main(int argc, char *argv[])
@@ -71,9 +67,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	//HANDLE receiverHandle;
 
-	//receiverHandle = (HANDLE)_beginthreadex(0, 0, &receiverThread, (void*)0, 0, 0);
 
 	gstScene scene;
 	gstSeparator *root = new gstSeparator();
@@ -124,6 +118,7 @@ int main(int argc, char *argv[])
 	gstTransform *shape = vrmlSep->getChild(2);
 	shape->setPosition_WC(newCenter);
 
+
 	gstPoint bla = phantom->getPosition_WC();
 	bla.printSelf();
 	
@@ -171,7 +166,7 @@ int main(int argc, char *argv[])
 }
 
 /*********************************************/
-//Sending function
+//Init Sending-Socket function
 /*********************************************/
 int initSendNetwork()
 {
@@ -203,47 +198,7 @@ int initSendNetwork()
 /*********************************************/
 //Thread init function for receiving
 /*********************************************/
-unsigned int __stdcall receiverThread(void*)
-{
-	int exit_num = receiveProcessingData();
-	return exit_num;
-}
 
 /*********************************************/
 //Functions for receiving data from Unity
 /*********************************************/
-int receiveProcessingData()
-{
-	iResultRecv = WSAStartup(MAKEWORD(2,2), &wsaDataRecv);
-	char *res;
-
-	if(iResultRecv != NO_ERROR)
-	{
-		cout << "WSASTartup failed with error " << iResultRecv << endl;
-		gets(res);
-		return 1;
-	}
-
-	connectSocketRecv = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if(connectSocketRecv == SOCKET_ERROR)
-	{
-		cout << "NO connection to host" << endl;
-		gets(res);
-		return 1;
-	}
-
-	memset((char *) &si_other_recv, 0, sizeof(si_other_recv));
-	si_other_recv.sin_family = AF_INET;
-	si_other_recv.sin_port = htons(RECEIVER_PORT);
-	si_other_recv.sin_addr.S_un.S_addr = inet_addr(SERVER);
-
-	char *recv_msg;
-
-	while(!stop)
-	{
-		recvfrom(connectSocketRecv, recv_msg, 1024, 0, (struct sockaddr *) &si_other_recv, &slen_recv);
-
-	}
-
-	return 0;
-}

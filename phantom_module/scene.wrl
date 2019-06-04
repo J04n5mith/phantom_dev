@@ -2,7 +2,7 @@
 #modeled using blender3d http://blender.org
 
 # 'Plane'
-Shape {
+DEF Plane Shape {
 	appearance Appearance {
 		material Material {
 		}
@@ -21,7 +21,7 @@ Shape {
 }
 
 # 'Cylinder'
-Shape {
+DEF Cylinder Shape {
 	appearance Appearance {
 		material Material {
 		}
@@ -40,7 +40,7 @@ Shape {
 }
 
 # 'Capsule'
-Shape {
+DEF Capsule Shape {
 	appearance Appearance {
 		material Material {
 		}
@@ -59,7 +59,7 @@ Shape {
 }
 
 # 'Cube.001'
-Shape {
+DEF Cube Shape {
 	appearance Appearance {
 		material Material {
 		}

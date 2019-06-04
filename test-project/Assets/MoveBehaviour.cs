@@ -12,6 +12,7 @@ public class MoveBehaviour : MonoBehaviour
     PhantomTalker talker;
     PhantomData data;
     GameObject mouse;
+    GameObject player;
     GameObject[] objects;
     Logger logger;
 
@@ -21,7 +22,7 @@ public class MoveBehaviour : MonoBehaviour
         logger = new Logger(new MyLogHandler());
 
         logger.Log("Starting application");
-        data = new PhantomData();
+        data = new PhantomData(20);
         listener = new PhantomListener(data, logger);
         talker = new PhantomTalker(data, logger);
         listener.StartListener(1024);
@@ -30,7 +31,11 @@ public class MoveBehaviour : MonoBehaviour
 
         mouse = GameObject.FindGameObjectWithTag("Player");
 
-        objects = GameObject.FindGameObjectWithTag("Untagged");
+	player = GameObject.FindGameObjectWithTag("GameController");
+	
+
+
+        objects = GameObject.FindGameObjectsWithTag("Untagged");
     }
 
 
@@ -47,6 +52,9 @@ public class MoveBehaviour : MonoBehaviour
                 talker.SendLocationOfGameObjects(i, objects[i].transform.position);
             }
         }
+
+
+
     }
 
     private void OnApplicationQuit()
