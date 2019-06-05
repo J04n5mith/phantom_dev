@@ -91,17 +91,9 @@ SOURCE=.\src\HelloGhost.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\MutexClass.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\UnityListener.cpp
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=.\MutexClass.h
-# End Source File
 # Begin Source File
 
 SOURCE=.\UnityListener.h

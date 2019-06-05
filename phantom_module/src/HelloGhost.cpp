@@ -35,31 +35,42 @@
 
 #pragma comment (lib, "Ws2_32.lib")
 
+/*********************************************/
+//Defines
+/*********************************************/
 #define DEFAULT_BULEN 1024
 #define SERVER "192.168.122.1"
 #define SENDER_PORT 8080
 
+/*********************************************/
+//Global data
+/*********************************************/
 struct sockaddr_in si_other_send;
 int connectSocketSend, slen_send=sizeof(si_other_send), iResultSend;
 WSADATA wsaDataSend;
 
-int id;
+UnityListener *listener;
 
 int recvbuflen;
 char *sendbuf;
 
 volatile sig_atomic_t stop;
 
+
+/*********************************************/
+//Function Prototypes
+/*********************************************/
 void inthand(int signum) {
     stop = 1;
 }
-
 int initSendNetwork();
 int receiveProcessingData();
+void SendMousePosition(gstPoint mousePosition);
 
 
 int main(int argc, char *argv[])
 {
+	listener = new UnityListener();
 
 	if(initSendNetwork() == 1)
 	{
@@ -115,6 +126,12 @@ int main(int argc, char *argv[])
 	
 	const gstPoint newCenter = new gstPoint(40, 0, 0);
 	
+	int numChild = vrmlSep->getNumChildren();
+	vector<double *> objectPositions;
+	for(int i = 0; i < numChild; i++)
+	{
+		positions vrmlSep->getChild(i)->getPosition_WC();
+	}
 	gstTransform *shape = vrmlSep->getChild(2);
 	shape->setPosition_WC(newCenter);
 
@@ -134,36 +151,58 @@ int main(int argc, char *argv[])
 	glutManager->startMainloop();
 	
 	
-	char msg[1024];
-	char *input;
-	const double * vector3;
-	signal(SIGINT, inthand);
-	//scene.startServoLoop();
-	
-	/*while(!stop) {
 
-		currentPoint = phantom->getPosition_WC();
-		vector3 = currentPoint.getValue();
-		memcpy(msg, vector3, (sizeof(double)*3));
-		if(sendto(connectSocketSend, msg, 1024, 0, (struct sockaddr *) &si_other_send, slen_send) == SOCKET_ERROR)
-		{
-			cout << "sendto() failed with error code : " << WSAGetLastError() << endl;
-			gets(input);
-			
-			exit(EXIT_FAILURE);
-		}
+
+	signal(SIGINT, inthand);
+	
+	while(!stop) {
+		
+
+		SendMousePosition(phantom->getPosition_WC());
+		
+
 		if(stop)	
 		{
 			scene.stopServoLoop();
 			break;
 		}
-	}*/
+
+	}
 
 	scene.stopServoLoop();
 	//CloseHandle(receiverHandle);
 	cin.get();
     return 0;
 }
+
+/*********************************************/
+//Get changed position of objects
+/*********************************************/
+int GetChangedPosition()
+{
+	return 0;
+}
+
+
+const double * vector3;
+char msg[1024];
+char *input;
+/*********************************************/
+//Sending mouse position
+/*********************************************/
+void SendMousePosition(gstPoint mousePosition)
+{
+	vector3 = mousePosition.getValue();
+	memcpy(msg, vector3, (sizeof(double)*3));
+	if(sendto(connectSocketSend, msg, 1024, 0, (struct sockaddr *) &si_other_send, slen_send) == SOCKET_ERROR)
+	{
+		cout << "sendto() failed with error code : " << WSAGetLastError() << endl;
+		gets(input);
+		
+		exit(EXIT_FAILURE);
+	}
+}
+
 
 /*********************************************/
 //Init Sending-Socket function
@@ -194,11 +233,3 @@ int initSendNetwork()
 	si_other_send.sin_addr.S_un.S_addr = inet_addr(SERVER);
 	return 0;
 }
-
-/*********************************************/
-//Thread init function for receiving
-/*********************************************/
-
-/*********************************************/
-//Functions for receiving data from Unity
-/*********************************************/
