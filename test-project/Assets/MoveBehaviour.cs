@@ -31,11 +31,14 @@ public class MoveBehaviour : MonoBehaviour
 
         mouse = GameObject.FindGameObjectWithTag("Player");
 
-	player = GameObject.FindGameObjectWithTag("GameController");
-	
+        player = GameObject.FindGameObjectWithTag("GameController");
+        
+        objects = GameObject.FindGameObjectsWithTag("Objects");
 
-
-        objects = GameObject.FindGameObjectsWithTag("Untagged");
+        foreach(GameObject go in objects)
+        {
+            logger.Log(go.name);
+        }
     }
 
 
@@ -43,14 +46,12 @@ public class MoveBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        
         mouse.transform.position = data.MousePosition;
         
         for (int i = 0; i < objects.Length; i++)
         {
-            if(objects[i].transform.hasChanged)
-            {
-                talker.SendLocationOfGameObjects(i, objects[i].transform.position);
-            }
+            talker.SendLocationOfGameObjects(i, objects[i].transform.position);
         }
 
 

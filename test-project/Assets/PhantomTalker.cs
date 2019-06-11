@@ -49,27 +49,14 @@ public class PhantomTalker
     public void SendLocationOfGameObjects(int id, Vector3 position)
     {
         double[] pos = {position.x, position.y, position.z};
+        logger.Log("Sending position..." + position.ToString());
         byte[] msg = new byte[1024];
         msg[0] = (byte)(id >> 24);
-	msg[1] = (byte)(id >> 16);
-	msg[2] = (byte)(id >> 8);
-	msg[3] = (byte)(id); 
+	    msg[1] = (byte)(id >> 16);
+	    msg[2] = (byte)(id >> 8);
+	    msg[3] = (byte)(id); 
         Buffer.BlockCopy(pos, 0, msg, 4, pos.Length);
         talker.Send(msg, msg.Length, groupEP);
     }
-
-    public double[] ParseVector(byte[] bytes)
-    {
-        double[] receivedDoubles = new double[3];
-
-        for (int i = 0; i < receivedDoubles.Length; i++)
-        {
-            receivedDoubles[i] = BitConverter.ToDouble(bytes, i*8);
-        }
-	
-	return receivedDoubles;
-    }
-
-    
 
 }

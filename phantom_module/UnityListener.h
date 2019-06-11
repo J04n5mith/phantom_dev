@@ -37,7 +37,7 @@ public:
 	virtual ~UnityListener();
 	void startListening();
 	void initPositions(vector<double*> objectPositions);
-	void getPosition(int id);
+	double* getPosition(int id);
 
 private:
 	int Init();

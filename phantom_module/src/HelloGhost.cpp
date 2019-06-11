@@ -56,6 +56,7 @@ char *sendbuf;
 
 volatile sig_atomic_t stop;
 
+double scale = 20.0;
 
 /*********************************************/
 //Function Prototypes
@@ -72,6 +73,8 @@ int main(int argc, char *argv[])
 {
 	listener = new UnityListener();
 
+	
+
 	if(initSendNetwork() == 1)
 	{
 		cout << "Network init failed, exiting..." << endl;
@@ -82,9 +85,23 @@ int main(int argc, char *argv[])
 
 	gstScene scene;
 	gstSeparator *root = new gstSeparator();
+
+	vector<gstSeparator *> vrmlObjs;
 	
-	gstSeparator *vrmlSep = gstReadVRMLFile("scene.wrl");
-	vrmlSep->scale(20.0);
+	gstSeparator *cube = gstReadVRMLFile("cube.wrl");
+	cube->scale(scale);
+	vrmlObjs.push_back(cube);
+	gstSeparator *capsule = gstReadVRMLFile("capsule.wrl");
+	capsule->scale(scale);
+	vrmlObjs.push_back(capsule);
+	gstSeparator *cylinder = gstReadVRMLFile("cylinder.wrl");
+	cylinder->scale(scale);
+	vrmlObjs.push_back(cylinder);
+	gstSeparator *plane = gstReadVRMLFile("plane.wrl");
+	plane->scale(scale);
+	vrmlObjs.push_back(plane);
+
+	
 
 	cout << "Place the PHANToM in its reset position and press <ENTER>." << endl;
 	cin.get();
@@ -95,14 +112,12 @@ int main(int argc, char *argv[])
 		exit(-1);
 	}
 
-
-
-	
-	//phantom->setCenter(newCenter);
-
 	scene.setRoot(root);
 	
-	root->addChild(vrmlSep);
+	root->addChild(cube);
+	root->addChild(capsule);
+	root->addChild(cylinder);
+	root->addChild(plane);
 	root->addChild(phantom);
 
 	while (gstVRMLGetNumErrors() > 0) {
@@ -124,21 +139,14 @@ int main(int argc, char *argv[])
 	name = (char *)node->getName();
 	cout << "Name of node " << name << endl;*/
 	
-	const gstPoint newCenter = new gstPoint(40, 0, 0);
-	
-	int numChild = vrmlSep->getNumChildren();
 	vector<double *> objectPositions;
-	for(int i = 0; i < numChild; i++)
+	for(int i = 0; i < vrmlObjs.size(); i++)
 	{
-		positions vrmlSep->getChild(i)->getPosition_WC();
+
+		objectPositions.push_back((double *)vrmlObjs[i]->getPosition_WC());
 	}
-	gstTransform *shape = vrmlSep->getChild(2);
-	shape->setPosition_WC(newCenter);
-
-
-	gstPoint bla = phantom->getPosition_WC();
-	bla.printSelf();
 	
+	listener->initPositions(objectPositions);
 	
 	//const gstTransform *phantomtrans = mani->getNode();
 
@@ -148,18 +156,29 @@ int main(int argc, char *argv[])
 
 	gstPoint currentPoint;
 
-	glutManager->startMainloop();
+	//glutManager->startMainloop();
 	
 	
-
+	listener->initPositions(objectPositions);
+	listener->startListening();
 
 	signal(SIGINT, inthand);
-	
+	gstPoint *tmpPoint;
+	double *vector;
 	while(!stop) {
 		
 
 		SendMousePosition(phantom->getPosition_WC());
-		
+
+		for(int i = 0; i < vrmlObjs.size(); i++)
+		{
+			vector = listener->getPosition(i);
+			cout << vector[0]*scale << ", " << vector[1]*scale << ", " << vector[2]*scale << endl;
+			tmpPoint = new gstPoint((vector[0]*scale), (vector[1]*scale), (vector[2]*scale));
+			vrmlObjs[i]->setPosition_WC(tmpPoint);
+		}
+		scene.updateGraphics();
+		scene.updateEvents();
 
 		if(stop)	
 		{
@@ -175,13 +194,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-/*********************************************/
-//Get changed position of objects
-/*********************************************/
-int GetChangedPosition()
-{
-	return 0;
-}
+
 
 
 const double * vector3;

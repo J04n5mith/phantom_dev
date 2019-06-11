@@ -15,8 +15,6 @@ public class PhantomListener
     Logger logger;
     PhantomData data;
 
-    public Vector3 ReceivedVector { get { return receivedVector; } }
-    private Vector3 receivedVector;
 
     public double ScaleFactor{get; set;}
     //constructor
@@ -24,8 +22,8 @@ public class PhantomListener
     {
         this.logger = logger;
         this.listening = false;
-        receivedVector = new Vector3();
-        receivedVector.Set(0, 0, 0);
+        
+        data.SetPhantomMousePoint(1, 1, 1);
         this.ScaleFactor = 20.0;
         this.data = data;
     }
@@ -58,9 +56,9 @@ public class PhantomListener
         {
             listener = new UdpClient(m_portToListen);
         }
-        catch (SocketException)
+        catch (SocketException sex)
         {
-            //do nothing
+            logger.LogException(sex);
         }
 
         if (listener != null)
@@ -70,7 +68,6 @@ public class PhantomListener
 
             try
             {
-                //string s = "";
                 double[] receivedDoubles = new double[3];
                 while (this.listening)
                 {
@@ -84,12 +81,11 @@ public class PhantomListener
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                logger.LogException(e);
             }
             finally
             {
                 listener.Close();
-                Console.WriteLine("Done listening for UDP broadcast");
             }
         }
     }
