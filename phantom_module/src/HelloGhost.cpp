@@ -165,6 +165,7 @@ int main(int argc, char *argv[])
 	signal(SIGINT, inthand);
 	gstPoint *tmpPoint;
 	double *vector;
+	double *lastVec = listener->getPosition(0);
 	while(!stop) {
 		
 
@@ -173,9 +174,14 @@ int main(int argc, char *argv[])
 		for(int i = 0; i < vrmlObjs.size(); i++)
 		{
 			vector = listener->getPosition(i);
-			cout << vector[0]*scale << ", " << vector[1]*scale << ", " << vector[2]*scale << endl;
-			tmpPoint = new gstPoint((vector[0]*scale), (vector[1]*scale), (vector[2]*scale));
-			vrmlObjs[i]->setPosition_WC(tmpPoint);
+			if(vector != lastVec)
+			{
+				lastVec = listener->getPosition(i);
+				cout << vector[0]*scale << ", " << vector[1]*scale << ", " << vector[2]*scale << endl;
+				tmpPoint = new gstPoint((vector[0]*scale), (vector[1]*scale), (vector[2]*scale));
+				vrmlObjs[i]->setPosition_WC(tmpPoint);
+			}
+			
 		}
 		scene.updateGraphics();
 		scene.updateEvents();

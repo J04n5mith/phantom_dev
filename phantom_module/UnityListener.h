@@ -30,7 +30,7 @@ class UnityListener
 	int connectSocketRecv, slen_recv, iResultRecv;
 	WSADATA wsaDataRecv;
 	char *SERVER;
-	int RECEIVER_PORT;
+	unsigned short RECEIVER_PORT;
 
 public:
 	UnityListener();

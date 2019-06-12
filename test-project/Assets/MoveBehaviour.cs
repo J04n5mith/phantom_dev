@@ -51,11 +51,9 @@ public class MoveBehaviour : MonoBehaviour
         
         for (int i = 0; i < objects.Length; i++)
         {
+            if(objects[i].transform.hasChanged)
             talker.SendLocationOfGameObjects(i, objects[i].transform.position);
         }
-
-
-
     }
 
     private void OnApplicationQuit()

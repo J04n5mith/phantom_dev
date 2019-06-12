@@ -46,16 +46,47 @@ public class PhantomTalker
         }
     }
 
+    static byte[] tmp = new byte[4];
     public void SendLocationOfGameObjects(int id, Vector3 position)
     {
         double[] pos = {position.x, position.y, position.z};
-        logger.Log("Sending position..." + position.ToString());
         byte[] msg = new byte[1024];
         msg[0] = (byte)(id >> 24);
 	    msg[1] = (byte)(id >> 16);
 	    msg[2] = (byte)(id >> 8);
 	    msg[3] = (byte)(id); 
-        Buffer.BlockCopy(pos, 0, msg, 4, pos.Length);
+        
+        tmp = BitConverter.GetBytes((float)position.x);
+        msg[4] = tmp[0];
+	    msg[5] = tmp[1];
+	    msg[6] = tmp[2];
+	    msg[7] = tmp[3];
+        
+        tmp = BitConverter.GetBytes((float)position.y);
+        msg[8] = tmp[0];
+	    msg[9] = tmp[1];
+	    msg[10] = tmp[2];
+	    msg[11] = tmp[3];
+
+        tmp = BitConverter.GetBytes((float)position.z);
+        msg[12] = tmp[0];
+	    msg[13] = tmp[1];
+	    msg[14] = tmp[2];
+	    msg[15] = tmp[3];
+        // msg[4] = (byte)(position.x >> 24);
+	    // msg[5] = (byte)(position.x >> 16);
+	    // msg[6] = (byte)(position.x >> 8);
+	    // msg[7] = (byte)(position.x); 
+
+        // msg[8] = (byte)(position.y >> 24);
+	    // msg[9] = (byte)(position.y >> 16);
+	    // msg[10] = (byte)(position.y >> 8);
+	    // msg[11] = (byte)(position.y); 
+
+        // msg[12] = (byte)(position.z >> 24);
+	    // msg[13] = (byte)(position.z >> 16);
+	    // msg[14] = (byte)(position.z >> 8);
+	    // msg[15] = (byte)(position.z); 
         talker.Send(msg, msg.Length, groupEP);
     }
 
