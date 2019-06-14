@@ -17,6 +17,8 @@ public class PhantomTalker
     Logger logger;
     PhantomData data;
 
+    
+
     public double ScaleFactor{get; set;}
     //constructor
     public PhantomTalker(PhantomData data, Logger logger)
@@ -49,30 +51,39 @@ public class PhantomTalker
     static byte[] tmp = new byte[4];
     public void SendLocationOfGameObjects(int id, Vector3 position)
     {
-        double[] pos = {position.x, position.y, position.z};
+        
+        
         byte[] msg = new byte[1024];
-        msg[0] = (byte)(id >> 24);
-	    msg[1] = (byte)(id >> 16);
-	    msg[2] = (byte)(id >> 8);
-	    msg[3] = (byte)(id); 
+        
+        //Operation type Position of GameObject
+        ushort op = (ushort)Operation.GAMEOBJECT_POS;
+        msg[0] = (byte)(op & 0x0f);
+        msg[1] = (byte)((op << 8) & 0x0f);
+
+        //ID of GameObject
+        tmp = BitConverter.GetBytes((int)id);
+        msg[5] = tmp[0];
+	    msg[4] = tmp[1];
+	    msg[3] = tmp[2];
+	    msg[2] = tmp[3]; 
         
         tmp = BitConverter.GetBytes((float)position.x);
-        msg[4] = tmp[0];
-	    msg[5] = tmp[1];
-	    msg[6] = tmp[2];
-	    msg[7] = tmp[3];
+        msg[9] = tmp[0];
+	    msg[8] = tmp[1];
+	    msg[7] = tmp[2];
+	    msg[6] = tmp[3];
         
         tmp = BitConverter.GetBytes((float)position.y);
-        msg[8] = tmp[0];
-	    msg[9] = tmp[1];
-	    msg[10] = tmp[2];
-	    msg[11] = tmp[3];
+        msg[13] = tmp[0];
+	    msg[12] = tmp[1];
+	    msg[11] = tmp[2];
+	    msg[10] = tmp[3];
 
         tmp = BitConverter.GetBytes((float)position.z);
-        msg[12] = tmp[0];
-	    msg[13] = tmp[1];
-	    msg[14] = tmp[2];
-	    msg[15] = tmp[3];
+        msg[17] = tmp[0];
+	    msg[16] = tmp[1];
+	    msg[15] = tmp[2];
+	    msg[14] = tmp[3];
         // msg[4] = (byte)(position.x >> 24);
 	    // msg[5] = (byte)(position.x >> 16);
 	    // msg[6] = (byte)(position.x >> 8);

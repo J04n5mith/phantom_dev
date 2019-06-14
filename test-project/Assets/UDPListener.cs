@@ -68,15 +68,12 @@ public class PhantomListener
 
             try
             {
-                double[] receivedDoubles = new double[3];
+                
                 while (this.listening)
                 {
-
                     byte[] bytes = listener.Receive(ref groupEP);
 
-                    receivedDoubles = ParseVector(bytes);
-                    
-                    data.SetPhantomMousePoint(receivedDoubles[0], receivedDoubles[1], receivedDoubles[2]);
+                    DeserializeMessage(bytes);
                 }
             }
             catch (Exception e)
@@ -90,15 +87,39 @@ public class PhantomListener
         }
     }
 
-    public double[] ParseVector(byte[] bytes)
+    private void DeserializeMessage(byte[] msg)
+    {
+        Operation op = (Operation)(msg[0] | (msg[1] << 8));
+        switch(op)
+        {
+            case Operation.MOUSE_POS:
+                SaveMousePositionFromBuffer(msg);
+                break;
+
+            default:
+                logger.Log("Not supported Operation");
+                break;
+
+        }
+
+    }
+
+    private void SaveMousePositionFromBuffer(byte[] msg)
+    {
+        double[] receivedDoubles = new double[3];
+        receivedDoubles = ParseVector(msg);
+        data.SetPhantomMousePoint(receivedDoubles[0], receivedDoubles[1], receivedDoubles[2]);
+    }
+
+    private double[] ParseVector(byte[] bytes)
     {
         double[] receivedDoubles = new double[3];
 
         for (int i = 0; i < receivedDoubles.Length; i++)
         {
-            receivedDoubles[i] = BitConverter.ToDouble(bytes, i*8);
+            receivedDoubles[i] = BitConverter.ToDouble(bytes, (i*8)+2);
         }
-	return receivedDoubles;
+	    return receivedDoubles;
     }
 
     

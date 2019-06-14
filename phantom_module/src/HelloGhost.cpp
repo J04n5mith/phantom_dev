@@ -142,7 +142,6 @@ int main(int argc, char *argv[])
 	vector<double *> objectPositions;
 	for(int i = 0; i < vrmlObjs.size(); i++)
 	{
-
 		objectPositions.push_back((double *)vrmlObjs[i]->getPosition_WC());
 	}
 	
@@ -165,7 +164,7 @@ int main(int argc, char *argv[])
 	signal(SIGINT, inthand);
 	gstPoint *tmpPoint;
 	double *vector;
-	double *lastVec = listener->getPosition(0);
+	double *lastVec;
 	while(!stop) {
 		
 
@@ -173,18 +172,17 @@ int main(int argc, char *argv[])
 
 		for(int i = 0; i < vrmlObjs.size(); i++)
 		{
+			lastVec = listener->getPosition(i);
 			vector = listener->getPosition(i);
 			if(vector != lastVec)
 			{
-				lastVec = listener->getPosition(i);
-				cout << vector[0]*scale << ", " << vector[1]*scale << ", " << vector[2]*scale << endl;
+				cout << "ID: " << i << ", Position: " << vector[0]*scale << ", " << vector[1]*scale << ", " << vector[2]*scale << endl;
 				tmpPoint = new gstPoint((vector[0]*scale), (vector[1]*scale), (vector[2]*scale));
 				vrmlObjs[i]->setPosition_WC(tmpPoint);
 			}
 			
+
 		}
-		scene.updateGraphics();
-		scene.updateEvents();
 
 		if(stop)	
 		{
@@ -212,7 +210,13 @@ char *input;
 void SendMousePosition(gstPoint mousePosition)
 {
 	vector3 = mousePosition.getValue();
-	memcpy(msg, vector3, (sizeof(double)*3));
+	Operation mousePos = MOUSE_POS;
+	char op[2];
+	op[0] = (mousePos & 0x0F);
+	op[1] = ((mousePos << 8) & 0x0F);
+
+	memcpy(msg, op, sizeof(op));
+	memcpy(msg+2, vector3, (sizeof(double)*3));
 	if(sendto(connectSocketSend, msg, 1024, 0, (struct sockaddr *) &si_other_send, slen_send) == SOCKET_ERROR)
 	{
 		cout << "sendto() failed with error code : " << WSAGetLastError() << endl;

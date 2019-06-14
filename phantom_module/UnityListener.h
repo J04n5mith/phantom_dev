@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <vector.h>
 
+enum Operation {MOUSE_POS, GAMEOBJECT_POS, FORCE_USHORT=0xFFFF};
 
 class UnityListener  
 {
@@ -43,6 +44,8 @@ private:
 	int Init();
 	int receiveProcessingData();
 	static unsigned int __stdcall receiverThread(void* p_this);
+	void dezerializeData(char* recv_msg);
+	void dezerializeGameObjectPos(char* recv_msg);
 
 };
 

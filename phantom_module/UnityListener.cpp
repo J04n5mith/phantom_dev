@@ -74,25 +74,12 @@ unsigned int __stdcall UnityListener::receiverThread(void* p_this)
 int UnityListener::receiveProcessingData()
 {
 	char recv_msg[1024];
-	int id, ret;
-	float tmp[3];
-	double vector[3];
-
+	
 	while(1)
 	{
 		if(recvfrom(connectSocketRecv, recv_msg, 1024, 0, (struct sockaddr *) &si_other_recv, &slen_recv) != -1)
 		{
-			id = (recv_msg[0] << 24) | (recv_msg[1] << 16) | (recv_msg[2] << 8) | (recv_msg[3]);
-			tmp[0] = (recv_msg[4] << 24) | (recv_msg[5] << 16) | (recv_msg[6] << 8) | (recv_msg[7]);
-			tmp[1] = (recv_msg[8] << 24) | (recv_msg[9] << 16) | (recv_msg[10] << 8) | (recv_msg[11]);
-			tmp[2] = (recv_msg[12] << 24) | (recv_msg[13] << 16) | (recv_msg[14] << 8) | (recv_msg[15]);
-			vector[0] = (double)tmp[0]; //x
-			vector[1] = (double)tmp[1]; //y
-			vector[2] = (double)-(tmp[2]); //z
-			objects[id] = vector;
-			printf("ID: %i (x, y, z) (%f, %f, %f) \n", id, vector[0], vector[1], vector[2]); 
-			//cout << "ID: " << id << "(x, y, z) (" << vector[0]*20 << ", " 
-			//	<< vector[1]*20 << ", " << vector[2]*20 << ")" << endl;
+			dezerializeData(recv_msg);
 		}
 	}
 
@@ -113,4 +100,56 @@ void UnityListener::initPositions(vector<double*> objectPositions)
 double* UnityListener::getPosition(int id)
 {
 	return objects[id];
+}
+
+void UnityListener::dezerializeData(char* recv_msg)
+{
+	WORD oper = recv_msg[0] | (recv_msg[1] << 8);
+	Operation op = (Operation)oper;
+	switch(op)
+	{
+		case GAMEOBJECT_POS:
+			dezerializeGameObjectPos(recv_msg);
+			break;
+		default:
+			printf("Incompatible Operation");
+	}
+}
+
+
+//union
+union test
+{
+   unsigned char buf[4];
+   float number;
+}test;
+
+void UnityListener::dezerializeGameObjectPos(char *recv_msg)
+{
+	int id;
+
+	id = (recv_msg[2] << 24) | (recv_msg[3] << 16) | (recv_msg[4] << 8) | (recv_msg[5]);
+	test.buf[0] = recv_msg[9];
+	test.buf[1] = recv_msg[8];
+	test.buf[2] = recv_msg[7];
+	test.buf[3] = recv_msg[6];
+	if(this->objects[id][0] != (double)test.number){this->objects[id][0] = (double)test.number;}
+
+
+	test.buf[0] = recv_msg[13];
+	test.buf[1] = recv_msg[12];
+	test.buf[2] = recv_msg[11];
+	test.buf[3] = recv_msg[10];
+	if(this->objects[id][1] != (double)test.number){this->objects[id][1] = (double)test.number;}
+
+
+	test.buf[0] = recv_msg[17];
+	test.buf[1] = recv_msg[16];
+	test.buf[2] = recv_msg[15];
+	test.buf[3] = recv_msg[14];
+	if(this->objects[id][2] != (double)test.number){this->objects[id][2] = (double)test.number;}
+
+
+	Sleep(0);
+	printf("ID: %d, Positions: (x, y, z) : (%f, %f, %f) \n", id, objects[id][0], objects[id][1], objects[id][2]);
 }

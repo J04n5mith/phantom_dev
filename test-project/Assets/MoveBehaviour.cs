@@ -6,6 +6,9 @@ using System.IO;
 using System;
 using UnityX3D;
 
+
+public enum Operation {MOUSE_POS, GAMEOBJECT_POS, FORCE_USHORT = 0xFF}
+
 public class MoveBehaviour : MonoBehaviour
 {
     PhantomListener listener;
@@ -35,9 +38,9 @@ public class MoveBehaviour : MonoBehaviour
         
         objects = GameObject.FindGameObjectsWithTag("Objects");
 
-        foreach(GameObject go in objects)
+        for (int i = 0; i < objects.Length; i++)
         {
-            logger.Log(go.name);
+            logger.Log(objects[i].name);
         }
     }
 
@@ -52,7 +55,10 @@ public class MoveBehaviour : MonoBehaviour
         for (int i = 0; i < objects.Length; i++)
         {
             if(objects[i].transform.hasChanged)
-            talker.SendLocationOfGameObjects(i, objects[i].transform.position);
+            {
+                logger.Log("Sending position");
+                talker.SendLocationOfGameObjects(i, objects[i].transform.position);
+            }
         }
     }
 
