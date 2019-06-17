@@ -56,7 +56,6 @@ public class MoveBehaviour : MonoBehaviour
         {
             if(objects[i].transform.hasChanged)
             {
-                logger.Log("Sending position");
                 talker.SendLocationOfGameObjects(i, objects[i].transform.position);
             }
         }

@@ -20,12 +20,16 @@
 
 enum Operation {MOUSE_POS, GAMEOBJECT_POS, FORCE_USHORT=0xFFFF};
 
+
+
 class UnityListener  
 {
+private:
 	vector<double *> objects;
 
 	HANDLE receiverHandle;
 	DWORD threadId;
+	HANDLE mutex;
 
 	struct sockaddr_in si_other_recv;
 	int connectSocketRecv, slen_recv, iResultRecv;
@@ -33,19 +37,22 @@ class UnityListener
 	char *SERVER;
 	unsigned short RECEIVER_PORT;
 
+
+
 public:
 	UnityListener();
 	virtual ~UnityListener();
 	void startListening();
-	void initPositions(vector<double*> objectPositions);
+	void initPositions(int number_of_objects, vector<double*> objectPositions);
 	double* getPosition(int id);
-
-private:
+	bool UnityListener::positionChanged(int id);
 	int Init();
 	int receiveProcessingData();
 	static unsigned int __stdcall receiverThread(void* p_this);
 	void dezerializeData(char* recv_msg);
 	void dezerializeGameObjectPos(char* recv_msg);
+	
+
 
 };
 

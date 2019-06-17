@@ -72,9 +72,7 @@ void SendMousePosition(gstPoint mousePosition);
 int main(int argc, char *argv[])
 {
 	listener = new UnityListener();
-
 	
-
 	if(initSendNetwork() == 1)
 	{
 		cout << "Network init failed, exiting..." << endl;
@@ -85,6 +83,7 @@ int main(int argc, char *argv[])
 
 	gstScene scene;
 	gstSeparator *root = new gstSeparator();
+
 
 	vector<gstSeparator *> vrmlObjs;
 	
@@ -98,6 +97,7 @@ int main(int argc, char *argv[])
 	cylinder->scale(scale);
 	vrmlObjs.push_back(cylinder);
 	gstSeparator *plane = gstReadVRMLFile("plane.wrl");
+	
 	plane->scale(scale);
 	vrmlObjs.push_back(plane);
 
@@ -128,25 +128,15 @@ int main(int argc, char *argv[])
 		cout << "on line " << err.GetLine() << endl;
 	}
 	scene.startServoLoop();
-	// create an instance of the GLUT OpenGL Manager
-	ghostGLUTManager *glutManager = ghostGLUTManager::CreateInstance(argc, argv, "gstTriPolyMesh Example");
-
-
-
-	glutManager->loadScene(&scene);
-	/*char *name = "Cylinder";
-	gstType *node = vrmlSep->getTypeId();
-	name = (char *)node->getName();
-	cout << "Name of node " << name << endl;*/
 	
 	vector<double *> objectPositions;
 	for(int i = 0; i < vrmlObjs.size(); i++)
 	{
-		objectPositions.push_back((double *)vrmlObjs[i]->getPosition_WC());
+		root->getChild(i)->getPosition_WC().printSelf();
+		objectPositions.push_back((double *)vrmlObjs[i]->getPosition());
 	}
 	
-	listener->initPositions(objectPositions);
-	
+
 	//const gstTransform *phantomtrans = mani->getNode();
 
 	//phantomtrans->setCenter(newCenter);
@@ -157,14 +147,12 @@ int main(int argc, char *argv[])
 
 	//glutManager->startMainloop();
 	
-	
-	listener->initPositions(objectPositions);
+	listener->initPositions(objectPositions.size(), objectPositions);
 	listener->startListening();
 
 	signal(SIGINT, inthand);
 	gstPoint *tmpPoint;
 	double *vector;
-	double *lastVec;
 	while(!stop) {
 		
 
@@ -172,15 +160,13 @@ int main(int argc, char *argv[])
 
 		for(int i = 0; i < vrmlObjs.size(); i++)
 		{
-			lastVec = listener->getPosition(i);
-			vector = listener->getPosition(i);
-			if(vector != lastVec)
+			if(listener->positionChanged(i))
 			{
+				vector = listener->getPosition(i);
 				cout << "ID: " << i << ", Position: " << vector[0]*scale << ", " << vector[1]*scale << ", " << vector[2]*scale << endl;
 				tmpPoint = new gstPoint((vector[0]*scale), (vector[1]*scale), (vector[2]*scale));
 				vrmlObjs[i]->setPosition_WC(tmpPoint);
-			}
-			
+			}		
 
 		}
 
@@ -193,7 +179,6 @@ int main(int argc, char *argv[])
 	}
 
 	scene.stopServoLoop();
-	//CloseHandle(receiverHandle);
 	cin.get();
     return 0;
 }
