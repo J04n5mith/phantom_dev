@@ -1,0 +1,1 @@
+HelloGhost.exe -ip 192.168.122.199 -p 5000 5005 -f dinoborg.wrl

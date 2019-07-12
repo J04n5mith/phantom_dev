@@ -19,40 +19,36 @@
 #include <gstBasic.h>
 #include <gstScene.h>
 #include <gstVRML.h>
-#include <ghostGLUTManager.h>
 #include <gstSphere.h>
 #include <gstSeparator.h>
 #include <iostream.h>
+#include <gstDynamic.h>
 
 #include <winsock2.h>
 #include <windows.h>
 #include <stdio.h>
 #include <signal.h>
 
+#include <time.h>
+
 #include <process.h>
 
 #include "../UnityListener.h"
+#include "../UnityTalker.h"
 
 #pragma comment (lib, "Ws2_32.lib")
 
 /*********************************************/
 //Defines
 /*********************************************/
-#define DEFAULT_BULEN 1024
-#define SERVER "192.168.122.1"
-#define SENDER_PORT 8080
 
 /*********************************************/
 //Global data
 /*********************************************/
 struct sockaddr_in si_other_send;
-int connectSocketSend, slen_send=sizeof(si_other_send), iResultSend;
-WSADATA wsaDataSend;
 
 UnityListener *listener;
-
-int recvbuflen;
-char *sendbuf;
+UnityTalker *talker;
 
 volatile sig_atomic_t stop;
 
@@ -64,45 +60,97 @@ double scale = 20.0;
 void inthand(int signum) {
     stop = 1;
 }
-int initSendNetwork();
-int receiveProcessingData();
-void SendMousePosition(gstPoint mousePosition);
+void printHelp();
+gstSeparator *my_fcn_to_get_sep_from_file(const char* file);
 
-
-int main(int argc, char *argv[])
+int main(int argc, const char *argv[])
 {
-	listener = new UnityListener();
+
+	if(argc < 6)
+	{
+		cout << "Invalid Arguments, should be minimal 5 arguments" << endl;
+		printHelp();
+		return 1;
+	}
+	if(strcmp(argv[1], "-h") == 0)
+	{
+		printHelp();
+		return 1;
+	}
+
+	char *path_to_vrml;
+	bool contains_vrml = false;
+	char *target_ip = "no";
+	unsigned short target_port_in;
+	unsigned short target_port_out;
 	
-	if(initSendNetwork() == 1)
+	printf("Parsing %d Arguments ...\n", argc);
+
+	for(int i = 0; i < argc; i++)
+	{
+		if(strcmp(argv[i],"-ip") == 0)
+		{
+			target_ip = (char *) malloc(strlen(argv[i+1])+1);
+			strcpy(target_ip, argv[i+1]);
+		}
+		if(strcmp(argv[i], "-p") == 0)
+		{
+			target_port_in = atoi(argv[i+1]);
+			target_port_out = atoi(argv[i+2]);
+		}
+		if(strcmp(argv[i], "-f") == 0)
+		{
+			path_to_vrml = (char *) malloc(strlen(argv[i+1])+1);
+			strcpy(path_to_vrml, argv[i+1]);
+			contains_vrml = true;
+		}
+	}
+
+	if((strcmp(target_ip, "no") == 0)
+	|| (target_port_in == NULL)
+	|| (target_port_out == NULL))
+	{
+		cout << "Invalid Arguments..." << endl;
+		printHelp();
+		return 1;
+	}
+
+	cout << "Arguments: " << endl;
+	cout << "IP: " << target_ip << endl;
+	printf("Talking port: %d\n", target_port_out);
+	printf("Listening port: %d\n", target_port_in);
+	cout << "VRML: " << path_to_vrml << endl;
+
+	listener = new UnityListener(target_ip, target_port_in);
+	talker = new UnityTalker(target_ip, target_port_in);
+	
+	if(talker->initSendNetwork() == 1)
 	{
 		cout << "Network init failed, exiting..." << endl;
 		return 1;
 	}
 
-
-
 	gstScene scene;
 	gstSeparator *root = new gstSeparator();
+	gstSeparator *vrmlScene;
 
+	const char* myvrml = path_to_vrml;
+	if(contains_vrml)
+	{
+		cout << "setting scale factor ..." << endl;
+		vrmlScene = my_fcn_to_get_sep_from_file(myvrml);
+		vrmlScene->scale(scale);
+		/*gstReadVRMLFile(path_to_vrml);
+		while (gstVRMLGetNumErrors() > 0) {
+			gstVRMLError err = gstVRMLPopEarliestError();
+			cout << "Error in VRML file ";
+			cout << gstVRMLGetErrorTypeName(err.GetError()) << " ";
+			cout << err.GetMSG() << " ";
+			cout << "on line " << err.GetLine() << endl;
+		}*/
+	}
 
-	vector<gstSeparator *> vrmlObjs;
 	
-	gstSeparator *cube = gstReadVRMLFile("cube.wrl");
-	cube->scale(scale);
-	vrmlObjs.push_back(cube);
-	gstSeparator *capsule = gstReadVRMLFile("capsule.wrl");
-	capsule->scale(scale);
-	vrmlObjs.push_back(capsule);
-	gstSeparator *cylinder = gstReadVRMLFile("cylinder.wrl");
-	cylinder->scale(scale);
-	vrmlObjs.push_back(cylinder);
-	gstSeparator *plane = gstReadVRMLFile("plane.wrl");
-	
-	plane->scale(scale);
-	vrmlObjs.push_back(plane);
-
-	
-
 	cout << "Place the PHANToM in its reset position and press <ENTER>." << endl;
 	cin.get();
 
@@ -113,63 +161,47 @@ int main(int argc, char *argv[])
 	}
 
 	scene.setRoot(root);
-	
-	root->addChild(cube);
-	root->addChild(capsule);
-	root->addChild(cylinder);
-	root->addChild(plane);
+	if(contains_vrml)
+	{
+		cout << "Adding vrml scene to root separator..." << endl;
+		root->addChild(vrmlScene);
+	}
 	root->addChild(phantom);
 
-	while (gstVRMLGetNumErrors() > 0) {
-		gstVRMLError err = gstVRMLPopEarliestError();
-		cout << "Error in VRML file ";
-		cout << gstVRMLGetErrorTypeName(err.GetError()) << " ";
-		cout << err.GetMSG() << " ";
-		cout << "on line " << err.GetLine() << endl;
-	}
 	scene.startServoLoop();
 	
-	vector<double *> objectPositions;
-	for(int i = 0; i < vrmlObjs.size(); i++)
-	{
-		root->getChild(i)->getPosition_WC().printSelf();
-		objectPositions.push_back((double *)vrmlObjs[i]->getPosition());
-	}
-	
-
-	//const gstTransform *phantomtrans = mani->getNode();
-
-	//phantomtrans->setCenter(newCenter);
-	
-	bool endFlag = false;
-
-	gstPoint currentPoint;
-
-	//glutManager->startMainloop();
-	
-	listener->initPositions(objectPositions.size(), objectPositions);
 	listener->startListening();
 
 	signal(SIGINT, inthand);
-	gstPoint *tmpPoint;
-	double *vector;
+	gstPoint tmpPoint;
+	const double *vector;
+	cout << "Start main loop... Press crtl+c to stop" << endl;
 	while(!stop) {
+		clock_t tStart = clock();
+
+		tmpPoint = phantom->getPosition_WC();
+		vector = tmpPoint.getValue();
+		talker->SendMousePosition((double*)vector);
+
+		printf("Time taken: %.20fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+		Sleep(1000);
 		
-
-		SendMousePosition(phantom->getPosition_WC());
-
-		for(int i = 0; i < vrmlObjs.size(); i++)
+		if(listener->turnForcesOn())
 		{
-			if(listener->positionChanged(i))
-			{
-				vector = listener->getPosition(i);
-				cout << "ID: " << i << ", Position: " << vector[0]*scale << ", " << vector[1]*scale << ", " << vector[2]*scale << endl;
-				tmpPoint = new gstPoint((vector[0]*scale), (vector[1]*scale), (vector[2]*scale));
-				vrmlObjs[i]->setPosition_WC(tmpPoint);
-			}		
+			phantom->setForceOutput(TRUE);
 
+			double* force = listener->getForce();
+			gstVector forceVec = new gstVector(force[0], force[1], force[2]);
+
+			double* torque = listener->getTorque();
+			gstVector torqueVec = new gstVector(torque[0], torque[1], torque[2]);
+			phantom->setForce(forceVec, torqueVec);
 		}
-
+		else
+		{
+			phantom->setForceOutput(FALSE);
+		}
+			
 		if(stop)	
 		{
 			scene.stopServoLoop();
@@ -179,65 +211,38 @@ int main(int argc, char *argv[])
 	}
 
 	scene.stopServoLoop();
+	cout << "Entered ctrl+c, press any key to get out!" << endl;
 	cin.get();
     return 0;
 }
 
-
-
-
-const double * vector3;
-char msg[1024];
-char *input;
-/*********************************************/
-//Sending mouse position
-/*********************************************/
-void SendMousePosition(gstPoint mousePosition)
+void printHelp()
 {
-	vector3 = mousePosition.getValue();
-	Operation mousePos = MOUSE_POS;
-	char op[2];
-	op[0] = (mousePos & 0x0F);
-	op[1] = ((mousePos << 8) & 0x0F);
+	cout << "Printing Help for tool:" << endl;
 
-	memcpy(msg, op, sizeof(op));
-	memcpy(msg+2, vector3, (sizeof(double)*3));
-	if(sendto(connectSocketSend, msg, 1024, 0, (struct sockaddr *) &si_other_send, slen_send) == SOCKET_ERROR)
-	{
-		cout << "sendto() failed with error code : " << WSAGetLastError() << endl;
-		gets(input);
-		
-		exit(EXIT_FAILURE);
-	}
+	cout << "Input should be as follow: ./unityexchange.exe -i <targetIP> -p <targetPortIn> <targetPortOut> -f /path/to/vrmlFile.wrl\n\n" << endl;
+
+	cout << "-i <targetIP> - IP of system where Unity is running on." << endl;
+	cout << "		- f.e.: -i 192.168.0.1\n\n" << endl;
+
+	cout << "-p <listen_port> <talking_port> - Port where unity and Phantom exchanging data." << endl;
+	cout << "		- f.e.: -p 50000 50005\n\n" << endl;
+	
+	cout << "-f /path/to/vrmlFile.wrl - (Optional) Haptic objects as VRML-Scene to add." << endl;
+	
+	cout << "-h - Print this help message" << endl;
 }
 
-
-/*********************************************/
-//Init Sending-Socket function
-/*********************************************/
-int initSendNetwork()
+gstSeparator *my_fcn_to_get_sep_from_file(const char* file)
 {
-	iResultSend = WSAStartup(MAKEWORD(2,2), &wsaDataSend);
-	char *res;
-
-	if(iResultSend != NO_ERROR)
+	gstSeparator *vrmlSep = gstReadVRMLFile(file);
+	while (gstVRMLGetNumErrors() > 0) 
 	{
-		cout << "WSASTartup failed with error " << iResultSend << endl;
-		gets(res);
-		return 1;
+		gstVRMLError err = gstVRMLPopEarliestError();
+		cout << "Error in VRML file ";
+		cout << gstVRMLGetErrorTypeName(err.GetError()) << " ";
+		cout << err.GetMSG() << " ";
+		cout << "on line " << err.GetLine() << endl;
 	}
-
-	connectSocketSend = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if(connectSocketSend == SOCKET_ERROR)
-	{
-		cout << "NO connection to host" << endl;
-		gets(res);
-		return 1;
-	}
-
-	memset((char *) &si_other_send, 0, sizeof(si_other_send));
-	si_other_send.sin_family = AF_INET;
-	si_other_send.sin_port = htons(SENDER_PORT);
-	si_other_send.sin_addr.S_un.S_addr = inet_addr(SERVER);
-	return 0;
+	return vrmlSep;
 }

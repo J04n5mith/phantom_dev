@@ -17,11 +17,12 @@ struct ObjectPositions {
 
 
 //Calls Init method
-UnityListener::UnityListener()
+UnityListener::UnityListener(char *server_ip, unsigned short port)
 {
-	RECEIVER_PORT = 8085;
-	SERVER = "192.168.122.1";
+	RECEIVER_PORT = port;
+	SERVER = server_ip;
 	slen_recv = sizeof(si_other_recv);
+	forcesOn = FALSE;
 	Init();
 }
 
@@ -96,26 +97,24 @@ void UnityListener::initPositions(int number_of_objects, vector<double*> objectP
 
 double* UnityListener::getPosition(int id)
 {
-	WaitForSingleObject(mutex, 1);
 	return pos[id].position;
 }
 
 bool UnityListener::positionChanged(int id)
 {
-	WaitForSingleObject(mutex, 1);
 	return pos[id].hasChanged;
 }
 
 int UnityListener::receiveProcessingData()
 {
-	char recv_msg[1024];
+	char recv_msg[100];
 
 	ObjectPositions *tmpPos = pos;
 	
 	while(1)
 	{
 		
-		if(recvfrom(connectSocketRecv, recv_msg, 1024, 0, (struct sockaddr *) &si_other_recv, &slen_recv) != -1)
+		if(recvfrom(connectSocketRecv, recv_msg, 100, 0, (struct sockaddr *) &si_other_recv, &slen_recv) != -1)
 		{
 			dezerializeData(recv_msg);
 		}
@@ -131,6 +130,21 @@ int UnityListener::receiveProcessingData()
 	return 0;
 }
 
+bool UnityListener::turnForcesOn()
+{
+	return forcesOn;
+}
+
+double* UnityListener::getTorque()
+{
+	return phantom_torque;
+}
+
+double* UnityListener::getForce()
+{
+	return phantom_force;
+}
+
 void UnityListener::dezerializeData(char* recv_msg)
 {
 	WORD oper = recv_msg[0] | (recv_msg[1] << 8);
@@ -139,6 +153,9 @@ void UnityListener::dezerializeData(char* recv_msg)
 	{
 		case GAMEOBJECT_POS:
 			dezerializeGameObjectPos(recv_msg);
+			break;
+		case FORCE_TORQUE_ON:
+			deserializeForceAndTorque(recv_msg);
 			break;
 		default:
 			printf("Incompatible Operation");
@@ -158,9 +175,6 @@ void UnityListener::dezerializeGameObjectPos(char *recv_msg)
 {
 	int id;
 
-	WaitForSingleObject(mutex, INFINITE);
-
-
 	id = (recv_msg[2] << 24) | (recv_msg[3] << 16) | (recv_msg[4] << 8) | (recv_msg[5]);
 	position_converter[0].buf[0] = recv_msg[9];
 	position_converter[0].buf[1] = recv_msg[8];
@@ -177,37 +191,104 @@ void UnityListener::dezerializeGameObjectPos(char *recv_msg)
 	position_converter[2].buf[2] = recv_msg[15];
 	position_converter[2].buf[3] = recv_msg[14];
 
+	//printf("ID: %d, Positions: (x, y, z) : (%f, %f, %f) \n", id, position_converter[0].number, position_converter[1].number, position_converter[2].number);
 
 	if( (pos[id].position[0] == (double)position_converter[0].number) &&
 		(pos[id].position[1] == (double)position_converter[1].number) &&
 		(pos[id].position[2] == (double)position_converter[2].number) )
 	{
-		cout << id << " all false" << endl;
+		//cout << id << " all false" << endl;
 		pos[id].hasChanged = false;
 		return;
 	}
 
 	if(pos[id].position[0] != (double)position_converter[0].number){
-		cout << id << " x true" << endl;
+		//cout << id << " x true" << endl;
 		pos[id].position[0] = (double)position_converter[0].number;
 		pos[id].hasChanged = true;
 	}
 
 
 	if(pos[id].position[1] != (double)position_converter[1].number){
-		cout << id << " y true" << endl;
+		//cout << id << " y true" << endl;
 		pos[id].position[1] = (double)position_converter[1].number;
 		pos[id].hasChanged = true;
 	}
 
-	if(pos[id].position[2] != (double)position_converter[2].number){
-		cout << id << " z true" << endl;
-		pos[id].position[2] = (double)position_converter[2].number;
+	if(pos[id].position[2] != (double)(-position_converter[2].number)){
+		//cout << id << " z true" << endl;
+		pos[id].position[2] = (double)(-position_converter[2].number);
 		pos[id].hasChanged = true;
 	}
-
-	
-	ReleaseMutex(mutex);
-	Sleep(10);
 	//printf("ID: %d, Positions: (x, y, z) : (%f, %f, %f) \n", id, pos[id].position[0], pos[id].position[1], pos[id].position[2]);
+}
+
+union force
+{
+   unsigned char buf[4];
+   float number;
+}force[3];
+
+union torque
+{
+	unsigned char buf[4];
+	float number;
+}torque[3];
+
+void UnityListener::deserializeForceAndTorque(char *recv_msg)
+{
+	forcesOn = (bool)recv_msg[2];
+	
+	if(forcesOn == TRUE)
+	{
+		/************Force************/
+		//X
+		force[0].buf[0] = recv_msg[6];
+		force[0].buf[1] = recv_msg[5];
+		force[0].buf[2] = recv_msg[4];
+		force[0].buf[3] = recv_msg[3];
+
+		//Y
+		force[1].buf[0] = recv_msg[10];
+		force[1].buf[1] = recv_msg[9];
+		force[1].buf[2] = recv_msg[8];
+		force[1].buf[3] = recv_msg[7];
+		
+		//Z
+		force[2].buf[0] = recv_msg[14];
+		force[2].buf[1] = recv_msg[13];
+		force[2].buf[2] = recv_msg[12];
+		force[2].buf[3] = recv_msg[11];
+		
+		phantom_force[0] = (double)force[0].number;
+		phantom_force[1] = (double)force[1].number;
+		phantom_force[2] = (double)force[2].number;
+		
+		//printf("FORCE: (x, y, z) : (%f, %f, %f) \n", phantom_force[0], phantom_force[1], phantom_force[2]);
+
+		/************Torque************/
+		//X
+		torque[0].buf[0] = recv_msg[18];
+		torque[0].buf[1] = recv_msg[17];
+		torque[0].buf[2] = recv_msg[16];
+		torque[0].buf[3] = recv_msg[15];
+
+		//Y
+		torque[1].buf[0] = recv_msg[22];
+		torque[1].buf[1] = recv_msg[21];
+		torque[1].buf[2] = recv_msg[20];
+		torque[1].buf[3] = recv_msg[19];
+		
+		//Z
+		torque[2].buf[0] = recv_msg[26];
+		torque[2].buf[1] = recv_msg[25];
+		torque[2].buf[2] = recv_msg[24];
+		torque[2].buf[3] = recv_msg[23];
+		
+		phantom_torque[0] = (double)torque[0].number;
+		phantom_torque[1] = (double)torque[1].number;
+		phantom_torque[2] = (double)torque[2].number;
+
+		//printf("FORCE: (x, y, z) : (%f, %f, %f) \n", phantom_torque[0], phantom_torque[1], phantom_torque[2]);
+	}
 }

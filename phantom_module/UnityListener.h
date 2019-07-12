@@ -18,14 +18,16 @@
 #include <stdlib.h>
 #include <vector.h>
 
-enum Operation {MOUSE_POS, GAMEOBJECT_POS, FORCE_USHORT=0xFFFF};
-
+enum Operation {MOUSE_POS, GAMEOBJECT_POS, FORCE_TORQUE_ON, FORCE_USHORT=0xFFFF};
 
 
 class UnityListener  
 {
 private:
 	vector<double *> objects;
+	bool forcesOn;
+	double phantom_force[3];
+	double phantom_torque[3];
 
 	HANDLE receiverHandle;
 	DWORD threadId;
@@ -37,10 +39,9 @@ private:
 	char *SERVER;
 	unsigned short RECEIVER_PORT;
 
-
-
+	void deserializeForceAndTorque(char *recv_msg);
 public:
-	UnityListener();
+	UnityListener(char *server_ip, unsigned short port);
 	virtual ~UnityListener();
 	void startListening();
 	void initPositions(int number_of_objects, vector<double*> objectPositions);
@@ -51,8 +52,9 @@ public:
 	static unsigned int __stdcall receiverThread(void* p_this);
 	void dezerializeData(char* recv_msg);
 	void dezerializeGameObjectPos(char* recv_msg);
-	
-
+	bool turnForcesOn();
+	double* getTorque();
+	double* getForce();
 
 };
 

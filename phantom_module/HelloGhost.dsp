@@ -93,10 +93,18 @@ SOURCE=.\src\HelloGhost.cpp
 
 SOURCE=.\UnityListener.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\UnityTalker.cpp
+# End Source File
 # End Group
 # Begin Source File
 
 SOURCE=.\UnityListener.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\UnityTalker.h
 # End Source File
 # End Target
 # End Project

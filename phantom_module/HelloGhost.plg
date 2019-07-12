@@ -3,38 +3,32 @@
 <pre>
 <h1>Build Log</h1>
 <h3>
---------------------Configuration: HelloGhost - Win32 Debug--------------------
+--------------------Configuration: HelloGhost - Win32 Release--------------------
 </h3>
 <h3>Command Lines</h3>
-Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSP249.tmp" with contents
+Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSP136.tmp" with contents
 [
-/nologo /MDd /W3 /Gm /GX /Zi /Od /I "C:\Programme\SensAble\GHOST\v3.1\include" /I "C:\Programme\SensAble\GHOST\v3.1\external\stl" /I "C:\Programme\SensAble\GHOST\v3.1\external\glut" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"Debug/" /Fp"Debug/HelloGhost.pch" /YX /Fo"Debug/" /Fd"Debug/" /FD /c 
+/nologo /MD /W3 /GX /O2 /I "C:\Programme\SensAble\GHOST\v3.1\include" /I "C:\Programme\SensAble\GHOST\v3.1\external\stl" /I "C:\Programme\SensAble\GHOST\v3.1\external\glut" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"Release/HelloGhost.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
 "C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp"
-"C:\Dokumente und Einstellungen\john\Desktop\phantom_module\UnityListener.cpp"
 ]
-Creating command line "cl.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSP249.tmp" 
-Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSP24A.tmp" with contents
+Creating command line "cl.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSP136.tmp" 
+Creating temporary file "C:\DOKUME~1\john\LOKALE~1\Temp\RSP137.tmp" with contents
 [
-ghost31.lib gstVRML31.lib ghostGLUTManager.lib glut32.lib ghostGLManager.lib HapticView.lib /nologo /subsystem:console /incremental:yes /pdb:"Debug/HelloGhost.pdb" /debug /machine:I386 /out:"Debug/HelloGhost.exe" /pdbtype:sept /libpath:"C:\Programme\SensAble\GHOST\v3.1\lib" /libpath:"C:\Programme\SensAble\GHOST\v3.1\external\glut" 
-".\Debug\HelloGhost.obj"
-".\Debug\UnityListener.obj"
+ghost31.lib gstVRML31.lib ghostGLUTManager.lib glut32.lib ghostGLManager.lib HapticView.lib /nologo /subsystem:console /incremental:no /pdb:"Release/HelloGhost.pdb" /machine:I386 /out:"Release/HelloGhost.exe" /libpath:"C:\Programme\SensAble\GHOST\v3.1\lib" /libpath:"C:\Programme\SensAble\GHOST\v3.1\external\glut" 
+".\Release\HelloGhost.obj"
+".\Release\UnityListener.obj"
+".\Release\UnityTalker.obj"
 ]
-Creating command line "link.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSP24A.tmp"
+Creating command line "link.exe @C:\DOKUME~1\john\LOKALE~1\Temp\RSP137.tmp"
 <h3>Output Window</h3>
 Compiling...
 HelloGhost.cpp
-UnityListener.cpp
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\src\HelloGhost.cpp(228) : warning C4700: local variable 'res' used without having been initialized
-C:\Dokumente und Einstellungen\john\Desktop\phantom_module\UnityListener.cpp(42) : warning C4700: local variable 'res' used without having been initialized
 Linking...
-Creating command line "bscmake.exe /nologo /o"Debug/HelloGhost.bsc"  ".\Debug\HelloGhost.sbr" ".\Debug\UnityListener.sbr""
-Creating browse info file...
-<h3>Output Window</h3>
 
 
 
 <h3>Results</h3>
-HelloGhost.exe - 0 error(s), 2 warning(s)
+HelloGhost.exe - 0 error(s), 0 warning(s)
 </pre>
 </body>
 </html>

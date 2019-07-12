@@ -8,7 +8,7 @@ using System.Linq;
 
 public class PhantomListener
 {
-    private int m_portToListen = 8080;
+    private int m_portToListen = 50000;
     private volatile bool listening;
     Thread m_ListeningThread;
     UdpClient listener;
