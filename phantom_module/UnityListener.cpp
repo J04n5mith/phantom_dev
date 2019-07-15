@@ -107,18 +107,16 @@ bool UnityListener::positionChanged(int id)
 
 int UnityListener::receiveProcessingData()
 {
-	char recv_msg[100];
-
-	ObjectPositions *tmpPos = pos;
+	char buffer[100];
+	short buffer_size;
 	
 	while(1)
-	{
-		
-		if(recvfrom(connectSocketRecv, recv_msg, 100, 0, (struct sockaddr *) &si_other_recv, &slen_recv) != -1)
+	{		
+		if((buffer_size = recvfrom(connectSocketRecv, buffer, 100, 0, (struct sockaddr *) &si_other_recv, &slen_recv)) >= 0)
 		{
-			dezerializeData(recv_msg);
+			printf("Buffersize: %d\n", buffer_size);
+			dezerializeData(buffer);
 		}
-
 	}
 
 	iResultRecv = closesocket(connectSocketRecv);
@@ -158,7 +156,7 @@ void UnityListener::dezerializeData(char* recv_msg)
 			deserializeForceAndTorque(recv_msg);
 			break;
 		default:
-			printf("Incompatible Operation");
+			printf("Incompatible Operation, Number: %d \n", oper);
 	}
 }
 

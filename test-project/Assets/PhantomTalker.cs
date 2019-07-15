@@ -21,15 +21,17 @@ public class PhantomTalker
 
     public double ScaleFactor{get; set;}
     //constructor
-    public PhantomTalker(PhantomData data, Logger logger)
+    public PhantomTalker(string ip_address, int port, PhantomData data, Logger logger)
     {
+        m_portToTalk = port;
+        address = System.Net.IPAddress.Parse(ip_address);
         this.logger = logger;
         this.talking = false;
         this.data = data;
         Init();
     }
 
-    public void Init()
+    private void Init()
     {
         talker = null;
         try
@@ -43,14 +45,14 @@ public class PhantomTalker
 
         if (talker != null)
         {
-            address = System.Net.IPAddress.Parse("192.168.122.199");
             groupEP = new IPEndPoint(address, m_portToTalk);
         }
     }
 
     public void SendForceVector(float[] force, float[] torque)
     {
-	    byte[] msg = new byte[1024];
+    
+	    byte[] msg = new byte[100];
 	    ushort op = (ushort)Operation.FORCE_TORQUE_ON;
 	    msg[0] = (byte)(op & 0x0f);
         msg[1] = (byte)((op << 8) & 0x0f);
@@ -109,7 +111,7 @@ public class PhantomTalker
 	public void turnForcesOff()
     {
         
-	    byte[] msg = new byte[1024];
+	    byte[] msg = new byte[100];
 	    ushort op = (ushort)Operation.FORCE_TORQUE_ON;
 	    msg[0] = (byte)(op & 0x0f);
         msg[1] = (byte)((op << 8) & 0x0f);
@@ -126,7 +128,7 @@ public class PhantomTalker
     {
         //logger.Log("Sending position " + id + " vector: " + position.ToString());  
         
-        byte[] msg = new byte[1024];
+        byte[] msg = new byte[100];
         
         //Operation type Position of GameObject
         ushort op = (ushort)Operation.GAMEOBJECT_POS;

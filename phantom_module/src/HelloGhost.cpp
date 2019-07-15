@@ -122,7 +122,7 @@ int main(int argc, const char *argv[])
 	cout << "VRML: " << path_to_vrml << endl;
 
 	listener = new UnityListener(target_ip, target_port_in);
-	talker = new UnityTalker(target_ip, target_port_in);
+	talker = new UnityTalker(target_ip, target_port_out);
 	
 	if(talker->initSendNetwork() == 1)
 	{
@@ -138,16 +138,16 @@ int main(int argc, const char *argv[])
 	if(contains_vrml)
 	{
 		cout << "setting scale factor ..." << endl;
-		vrmlScene = my_fcn_to_get_sep_from_file(myvrml);
-		vrmlScene->scale(scale);
-		/*gstReadVRMLFile(path_to_vrml);
+		vrmlScene = gstReadVRMLFile(path_to_vrml);
 		while (gstVRMLGetNumErrors() > 0) {
 			gstVRMLError err = gstVRMLPopEarliestError();
 			cout << "Error in VRML file ";
 			cout << gstVRMLGetErrorTypeName(err.GetError()) << " ";
 			cout << err.GetMSG() << " ";
 			cout << "on line " << err.GetLine() << endl;
-		}*/
+		}
+		vrmlScene->scale(scale);
+		
 	}
 
 	
@@ -177,14 +177,14 @@ int main(int argc, const char *argv[])
 	const double *vector;
 	cout << "Start main loop... Press crtl+c to stop" << endl;
 	while(!stop) {
-		clock_t tStart = clock();
+		//clock_t tStart = clock();
 
 		tmpPoint = phantom->getPosition_WC();
 		vector = tmpPoint.getValue();
 		talker->SendMousePosition((double*)vector);
 
-		printf("Time taken: %.20fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
-		Sleep(1000);
+		//printf("Time taken: %.20fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
+		//Sleep(1000);
 		
 		if(listener->turnForcesOn())
 		{
@@ -231,18 +231,4 @@ void printHelp()
 	cout << "-f /path/to/vrmlFile.wrl - (Optional) Haptic objects as VRML-Scene to add." << endl;
 	
 	cout << "-h - Print this help message" << endl;
-}
-
-gstSeparator *my_fcn_to_get_sep_from_file(const char* file)
-{
-	gstSeparator *vrmlSep = gstReadVRMLFile(file);
-	while (gstVRMLGetNumErrors() > 0) 
-	{
-		gstVRMLError err = gstVRMLPopEarliestError();
-		cout << "Error in VRML file ";
-		cout << gstVRMLGetErrorTypeName(err.GetError()) << " ";
-		cout << err.GetMSG() << " ";
-		cout << "on line " << err.GetLine() << endl;
-	}
-	return vrmlSep;
 }

@@ -68,25 +68,14 @@ public class MoveBehaviour : MonoBehaviour
 
         logger.Log("Starting application");
         data = new PhantomData(20);
-        listener = new PhantomListener(data, logger);
-        talker = new PhantomTalker(data, logger);
-        listener.StartListener(1024);
+        listener = new PhantomListener("192.168.122.199", 50005, data, logger);
+        talker = new PhantomTalker("192.168.122.199", 50000, data, logger);
+        listener.StartListener(100);
         logger.Log("UDP Listener initialized");
         
-
         mouse = GameObject.FindGameObjectWithTag("Player");
 
-        player = GameObject.FindGameObjectWithTag("GameController");
-        
-        objects = GameObject.FindGameObjectsWithTag("Objects");
-
-        lastPosition = new Vector3[objects.Length];
-
-        for (int i = 0; i < objects.Length; i++)
-        {
-            logger.Log(objects[i].name);
-	    lastPosition[i] = objects[i].transform.position;
-        }
+   
     }
 
 
@@ -97,14 +86,6 @@ public class MoveBehaviour : MonoBehaviour
         
         mouse.transform.position = data.MousePosition;
         
-        /*for (int i = 0; i < objects.Length; i++)
-        {
-            if(objects[i].transform.position != lastPosition[i])
-            {
-		lastPosition[i] = objects[i].transform.position;
-                talker.SendLocationOfGameObjects(i, objects[i].transform.position);
-            }
-        }*/
     }
 
     private void OnApplicationQuit()

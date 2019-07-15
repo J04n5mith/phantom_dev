@@ -8,7 +8,9 @@ using System.Linq;
 
 public class PhantomListener
 {
-    private int m_portToListen = 50000;
+    private int m_portToListen;
+    IPAddress address;
+    
     private volatile bool listening;
     Thread m_ListeningThread;
     UdpClient listener;
@@ -18,11 +20,12 @@ public class PhantomListener
 
     public double ScaleFactor{get; set;}
     //constructor
-    public PhantomListener(PhantomData data, Logger logger)
+    public PhantomListener(string target_ip, int port, PhantomData data, Logger logger)
     {
         this.logger = logger;
         this.listening = false;
-        
+        m_portToListen = port;
+        address = System.Net.IPAddress.Parse(target_ip);
         data.SetPhantomMousePoint(1, 1, 1);
         this.ScaleFactor = 20.0;
         this.data = data;
@@ -63,7 +66,6 @@ public class PhantomListener
 
         if (listener != null)
         {
-            IPAddress address = System.Net.IPAddress.Parse("192.168.122.199");
             IPEndPoint groupEP = new IPEndPoint(address, m_portToListen);
 
             try

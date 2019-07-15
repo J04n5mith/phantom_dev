@@ -12,14 +12,14 @@ public class movearound : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        GameObject[] cube = GameObject.FindGameObjectsWithTag("Objects");
+        /*GameObject[] cube = GameObject.FindGameObjectsWithTag("Objects");
 		target =  cube[0].transform;
-        target.transform.position = new Vector3(2.0f, 0.0f, 2.0f);
+        target.transform.position = new Vector3(2.0f, 0.0f, 2.0f);*/
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		// Move our position a step closer to the target.
+		/*// Move our position a step closer to the target.
         float step =  speed * Time.deltaTime; // calculate distance to move
         transform.position = Vector3.MoveTowards(transform.position, target.position, step);
 
@@ -28,7 +28,7 @@ public class movearound : MonoBehaviour {
         {
             // Swap the position of the cylinder.
             target.position *= -1.0f;
-        }
+        }*/
 		
 	}
 }
