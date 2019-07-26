@@ -1,17 +1,9 @@
-//=============================================================================
+//====================================
 //     Filename : HelloGhost.cpp
 //   Written by : Brandon Itkowitz
-//     Contains : Example GHOST Application
-// ----------------------------------------------------------------------------
-// This program demonstrates how to create a GHOST scene graph, add a primitive
-// to it and then feel the scene.
-//
-// Send your questions, comments or bugs to:
-//    support@sensable.com
-//    http://www.sensable.com
-//
-// Copyright (c) 1996-1999 SensAble Technologies, Inc. All rights reserved.
-//=============================================================================
+//     Contains : Server
+// -----------------------------------
+
 #undef UNICODE
 #define WIN32_LEAN_AND_MEAN
 
