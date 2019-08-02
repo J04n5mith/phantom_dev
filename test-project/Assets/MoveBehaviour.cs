@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.IO;
@@ -20,51 +21,68 @@ public class MoveBehaviour : MonoBehaviour
     Vector3[] lastPosition;
     Logger logger;
 
-    public float hoverForce;
 
-	void OnCollisionEnter(Collision col)
-	{
-	    
-		Debug.Log("We hit something");
-		foreach(ContactPoint contact in col.contacts)
-		{
-		    float[] bla = {0.0f, 0.0f, 0.0f};
-	        Vector3 dir = (contact.point - transform.position);
-	        dir = -dir.normalized;
-	        float[] force = {dir.x, dir.y, dir.z};
-	        talker.SendForceVector(force, bla);
-			Debug.Log(contact.thisCollider.name + " hit " + contact.otherCollider.name);
-		}	
-		
-		
+    
+    float[] force = new float[3];
+    Vector3 forceDirection;
+
+	void OnCollisionEnter(Collision other)
+	{	    
+		forceDirection = Vector3.zero;
+		ContactPoint contactPoint = other.contacts[0];
+		Vector3 normal = contactPoint.normal;
+        
+        //unity has a left directional coordinate system
+		forceDirection.x = normal.x;
+		forceDirection.y = normal.y;
+		forceDirection.z = -normal.z;  
+        //Debug.Log("Direction: " + dir.ToString());
 	}
+	
+	float rigidyFactor = 0.1f;
+    float[] torque = {0.0f, 0.0f, 0.0f};
 
 	void OnCollisionStay(Collision other)
 	{
-		Debug.Log("Stay Here!!!");
-		foreach(ContactPoint contact in other.contacts)
-		{
-		    float[] bla = {0.0f, 0.0f, 0.0f};
-	        Vector3 dir = (contact.point - transform.position);
-	        dir = -dir.normalized;
-	        float[] force = {dir.x, dir.y, dir.z};
-			Debug.Log(contact.point);
-			//Debug.DrawRay(contact.point, contact.normal, Color.black);
-			//float dist = Vector3.Distance(contact.point, transform.position);
-		}
-		//other.GetComponent<Rigidbody>().AddForce(Vector3.up * hoverForce, ForceMode.Acceleration);
-	}
+	    //Debug.Log("Name: " + other.gameObject.name);
+		Vector3 center = other.collider.bounds.center;
+	
+		ContactPoint contactPoint = other.contacts[0];
+        Vector3 normal = contactPoint.normal;
 
+        RaycastHit hit;
+        //Debug.DrawRay(center, normal, Color.green);
+        if (Physics.Raycast(center, normal, out hit))
+        {
+            float penetrationDepth = hit.distance;
+            force[0] = forceDirection.x*rigidyFactor/(penetrationDepth);  
+            force[1] = forceDirection.y*rigidyFactor/(penetrationDepth);
+            force[2] = forceDirection.z*rigidyFactor/(penetrationDepth);
+            Debug.Log( "Depth: " + penetrationDepth );
+        }
+        
+        /*force[0] = dir.x*rigidyFactor;  
+        force[1] = dir.y*rigidyFactor;
+        force[2] = dir.z*rigidyFactor;*/
+        //Debug.Log("force: " + force[0] + ", " + force[1] + ", " + force[2]);
+        talker.SendForceVector(force, torque);
+	}
+	
 	void OnCollisionExit(Collision other)
 	{
-	    talker.turnForcesOff();
-		Debug.Log("We are out");
+	    float[] zeroTorque = {0.0f, 0.0f, 0.0f};
+		float[] zeroForce = {0.0f, 0.0f, 0.0f};
+		
+	    talker.SendForceVector(zeroForce, zeroTorque);
 	}
+
 
     // Start is called before the first frame update
     void Start()
     {
         logger = new Logger(new MyLogHandler());
+        
+        Application.targetFrameRate = 1000;
 
         logger.Log("Starting application");
         data = new PhantomData(20);
@@ -82,16 +100,28 @@ public class MoveBehaviour : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
-        
-        mouse.transform.position = data.MousePosition;
-        
+    {        
+        mouse.transform.position = data.MousePosition;        
     }
 
     private void OnApplicationQuit()
     {
         listener.StopListener();
     }
+    
+    /*private Vector3 screenPoint;
+	private Vector3 offset;
+		
+	void OnMouseDown(){
+		screenPoint = Camera.main.WorldToScreenPoint(gameObject.transform.position);
+		offset = gameObject.transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z));
+	}
+		
+	void OnMouseDrag(){
+		Vector3 cursorPoint = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPoint.z);
+		Vector3 cursorPosition = Camera.main.ScreenToWorldPoint(cursorPoint) + offset;
+		transform.position = cursorPosition;
+	}*/
 }
 
 public class MyLogHandler : ILogHandler

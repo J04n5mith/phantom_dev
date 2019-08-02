@@ -61,14 +61,13 @@ void inthand(int signum) {
     stop = 1;
 }
 void printHelp();
-gstSeparator *my_fcn_to_get_sep_from_file(const char* file);
 
 int main(int argc, const char *argv[])
 {
 
-	if(argc < 6)
+	if(argc < 7)
 	{
-		cout << "Invalid Arguments, should be minimal 5 arguments" << endl;
+		cout << "Invalid Arguments, should be minimal 7 arguments" << endl;
 		printHelp();
 		return 1;
 	}
@@ -80,6 +79,7 @@ int main(int argc, const char *argv[])
 
 	char *path_to_vrml;
 	bool contains_vrml = false;
+	bool force_mode = false;
 	char *target_ip = "no";
 	unsigned short target_port_in;
 	unsigned short target_port_out;
@@ -104,6 +104,28 @@ int main(int argc, const char *argv[])
 			strcpy(path_to_vrml, argv[i+1]);
 			contains_vrml = true;
 		}
+		if(strcmp(argv[i], "-m") == 0)
+		{
+			if(strcmp(argv[i+1], "force") == 0)
+			{
+				force_mode = true;
+			}
+			else if(strcmp(argv[i+1], "vrml") == 0)
+			{
+				force_mode = false;
+			}
+			else
+			{
+				cout << "Invalid Mode " << argv[i+1] << endl;
+				printHelp();
+				return 1;
+			}
+		}
+
+		if(strcmp(argv[i], "-s") == 0)
+		{
+			scale = atof(argv[i+1]);
+		}
 	}
 
 	if((strcmp(target_ip, "no") == 0)
@@ -115,11 +137,21 @@ int main(int argc, const char *argv[])
 		return 1;
 	}
 
-	cout << "Arguments: " << endl;
-	cout << "IP: " << target_ip << endl;
-	printf("Talking port: %d\n", target_port_out);
-	printf("Listening port: %d\n", target_port_in);
-	cout << "VRML: " << path_to_vrml << endl;
+	cout << "Set parameter: " << endl;
+	cout << "Target IP: " << target_ip << endl;
+	printf("Target talking port: %d\n", target_port_out);
+	printf("Target listening port: %d\n", target_port_in);
+	cout << "Target VRML file: " << path_to_vrml << endl;
+	printf("Scale factor: %f\n", scale);
+	if(force_mode)
+	{
+		cout << "Mode: force" << endl;
+	}
+	else
+	{
+		cout << "Mode: vrml" << endl;
+	}
+
 
 	listener = new UnityListener(target_ip, target_port_in);
 	talker = new UnityTalker(target_ip, target_port_out);
@@ -137,7 +169,6 @@ int main(int argc, const char *argv[])
 	const char* myvrml = path_to_vrml;
 	if(contains_vrml)
 	{
-		cout << "setting scale factor ..." << endl;
 		vrmlScene = gstReadVRMLFile(path_to_vrml);
 		while (gstVRMLGetNumErrors() > 0) {
 			gstVRMLError err = gstVRMLPopEarliestError();
@@ -176,38 +207,56 @@ int main(int argc, const char *argv[])
 	gstPoint tmpPoint;
 	const double *vector;
 	cout << "Start main loop... Press crtl+c to stop" << endl;
-	while(!stop) {
-		//clock_t tStart = clock();
 
-		tmpPoint = phantom->getPosition_WC();
-		vector = tmpPoint.getValue();
-		talker->SendMousePosition((double*)vector);
+	if(force_mode)
+	{
+		while(!stop) {
 
-		//printf("Time taken: %.20fs\n", (double)(clock() - tStart)/CLOCKS_PER_SEC);
-		//Sleep(1000);
-		
-		if(listener->turnForcesOn())
-		{
-			phantom->setForceOutput(TRUE);
+			tmpPoint = phantom->getPosition_WC();
+			vector = tmpPoint.getValue();
+			talker->SendMousePosition((double*)vector);
 
-			double* force = listener->getForce();
-			gstVector forceVec = new gstVector(force[0], force[1], force[2]);
-
-			double* torque = listener->getTorque();
-			gstVector torqueVec = new gstVector(torque[0], torque[1], torque[2]);
-			phantom->setForce(forceVec, torqueVec);
-		}
-		else
-		{
-			phantom->setForceOutput(FALSE);
-		}
 			
-		if(stop)	
-		{
-			scene.stopServoLoop();
-			break;
-		}
+			if(listener->turnForcesOn())
+			{
 
+				phantom->setForceOutput(TRUE);
+
+				double* force = listener->getForce();
+				gstVector forceVec = new gstVector(force[0], force[1], force[2]);
+
+				double* torque = listener->getTorque();
+				gstVector torqueVec = new gstVector(torque[0], torque[1], torque[2]);
+				phantom->setForce(forceVec, torqueVec);
+			}
+			else
+			{
+				clock_t tStart = clock();
+				phantom->setForceOutput(FALSE);
+			}
+			
+				
+			if(stop)	
+			{
+				scene.stopServoLoop();
+				break;
+			}
+
+		}
+	}
+	else
+	{
+		while(!stop) {
+
+			tmpPoint = phantom->getPosition_WC();
+			vector = tmpPoint.getValue();
+			talker->SendMousePosition((double*)vector);
+			if(stop)	
+			{
+				scene.stopServoLoop();
+				break;
+			}
+		}
 	}
 
 	scene.stopServoLoop();
@@ -222,13 +271,22 @@ void printHelp()
 
 	cout << "Input should be as follow: ./unityexchange.exe -i <targetIP> -p <targetPortIn> <targetPortOut> -f /path/to/vrmlFile.wrl\n\n" << endl;
 
-	cout << "-i <targetIP> - IP of system where Unity is running on." << endl;
+	cout << "-ip <targetIP> - IP of system where Unity is running on." << endl;
 	cout << "		- f.e.: -i 192.168.0.1\n\n" << endl;
 
 	cout << "-p <listen_port> <talking_port> - Port where unity and Phantom exchanging data." << endl;
 	cout << "		- f.e.: -p 50000 50005\n\n" << endl;
+
+	cout << "-m <mode> - application mode, either 'vrml' or 'force'" << endl;
+	cout << "force: haptic logic in Unity" << endl;
+	cout << "vrml: haptic logic in GHOST with vrml\n\n" << endl;
 	
-	cout << "-f /path/to/vrmlFile.wrl - (Optional) Haptic objects as VRML-Scene to add." << endl;
+	cout << "-s <scale_in_double> - scale factor to scale the vrml Object if needed, because the size is in mm" << endl;
+	cout << "		- f.e.: -s 20.0 (20 is default)\n\n" << endl;
+
+	cout << "-f </path/to/vrmlFile.wrl> - (Optional) Haptic objects as VRML-Scene to add.\n\n" << endl;
+
+
 	
 	cout << "-h - Print this help message" << endl;
 }

@@ -114,7 +114,6 @@ int UnityListener::receiveProcessingData()
 	{		
 		if((buffer_size = recvfrom(connectSocketRecv, buffer, 100, 0, (struct sockaddr *) &si_other_recv, &slen_recv)) >= 0)
 		{
-			printf("Buffersize: %d\n", buffer_size);
 			dezerializeData(buffer);
 		}
 	}
@@ -189,7 +188,6 @@ void UnityListener::dezerializeGameObjectPos(char *recv_msg)
 	position_converter[2].buf[2] = recv_msg[15];
 	position_converter[2].buf[3] = recv_msg[14];
 
-	//printf("ID: %d, Positions: (x, y, z) : (%f, %f, %f) \n", id, position_converter[0].number, position_converter[1].number, position_converter[2].number);
 
 	if( (pos[id].position[0] == (double)position_converter[0].number) &&
 		(pos[id].position[1] == (double)position_converter[1].number) &&
@@ -218,7 +216,6 @@ void UnityListener::dezerializeGameObjectPos(char *recv_msg)
 		pos[id].position[2] = (double)(-position_converter[2].number);
 		pos[id].hasChanged = true;
 	}
-	//printf("ID: %d, Positions: (x, y, z) : (%f, %f, %f) \n", id, pos[id].position[0], pos[id].position[1], pos[id].position[2]);
 }
 
 union force
@@ -262,7 +259,6 @@ void UnityListener::deserializeForceAndTorque(char *recv_msg)
 		phantom_force[1] = (double)force[1].number;
 		phantom_force[2] = (double)force[2].number;
 		
-		//printf("FORCE: (x, y, z) : (%f, %f, %f) \n", phantom_force[0], phantom_force[1], phantom_force[2]);
 
 		/************Torque************/
 		//X
@@ -286,7 +282,5 @@ void UnityListener::deserializeForceAndTorque(char *recv_msg)
 		phantom_torque[0] = (double)torque[0].number;
 		phantom_torque[1] = (double)torque[1].number;
 		phantom_torque[2] = (double)torque[2].number;
-
-		//printf("FORCE: (x, y, z) : (%f, %f, %f) \n", phantom_torque[0], phantom_torque[1], phantom_torque[2]);
 	}
 }

@@ -1,1 +1,2 @@
-HelloGhost.exe -ip 192.168.122.199 -p 5000 5005 -f dinoborg.wrl
+HelloGhost.exe -ip 192.168.122.1 -p 50000 50005 -m force
+HelloGhost.exe -ip 192.168.122.1 -p 50000 50005 -m vrml -f skull_scene_final.wrl

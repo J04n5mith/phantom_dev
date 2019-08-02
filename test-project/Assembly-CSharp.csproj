@@ -53,12 +53,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\collision.cs" />
-     <Compile Include="Assets\movearound.cs" />
      <Compile Include="Assets\MoveBehaviour.cs" />
      <Compile Include="Assets\OBJExport\OBJExporter.cs" />
      <Compile Include="Assets\PhantomData.cs" />
      <Compile Include="Assets\PhantomTalker.cs" />
+     <Compile Include="Assets\RobotSphere\Assets\Scripts\robotAnimScript.cs" />
      <Compile Include="Assets\SampleScenes\Menu\Scripts\MenuSceneLoader.cs" />
      <Compile Include="Assets\SampleScenes\Menu\Scripts\PauseMenu.cs" />
      <Compile Include="Assets\SampleScenes\Menu\Scripts\SceneAndURLLoader.cs" />

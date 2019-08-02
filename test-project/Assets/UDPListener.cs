@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Threading;
+using System.Diagnostics;
 using System;
 using System.Net.Sockets;
 using System.Net;
@@ -52,6 +53,7 @@ public class PhantomListener
 
 
 
+   readonly double _microSecPerTick = 1000000D / System.Diagnostics.Stopwatch.Frequency;
     public void ListenForUDPPackages()
     {
         listener = null;
@@ -74,8 +76,14 @@ public class PhantomListener
                 while (this.listening)
                 {
                     byte[] bytes = listener.Receive(ref groupEP);
-
+                    
+                    /*Stopwatch stopWatch = new Stopwatch();
+                    stopWatch.Start();*/
                     DeserializeMessage(bytes);
+                    /*stopWatch.Stop();
+                    long ts = (long)(stopWatch.ElapsedTicks * _microSecPerTick);
+                    logger.Log("Microseconds: " + ts);*/
+                    
                 }
             }
             catch (Exception e)
