@@ -2,8 +2,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_UNITYLISTENER_H__0690F1BF_2DA6_4391_99DC_21764C78BED1__INCLUDED_)
-#define AFX_UNITYLISTENER_H__0690F1BF_2DA6_4391_99DC_21764C78BED1__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once

@@ -2,8 +2,6 @@
 //
 //////////////////////////////////////////////////////////////////////
 
-#if !defined(AFX_UNITYTALKER_H__59C2F0B8_CB48_4C80_813F_8096442D2F43__INCLUDED_)
-#define AFX_UNITYTALKER_H__59C2F0B8_CB48_4C80_813F_8096442D2F43__INCLUDED_
 
 #if _MSC_VER > 1000
 #pragma once
