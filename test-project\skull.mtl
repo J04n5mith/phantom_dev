@@ -1,8 +1,0 @@
-newmtl defaultMat
-Kd 0.8 0.8 0.8
-illum 2
-
-newmtl Default-Material
-Kd 1 1 1
-illum 2
-
