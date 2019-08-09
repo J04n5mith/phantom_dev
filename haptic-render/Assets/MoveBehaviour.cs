@@ -23,6 +23,7 @@ public class MoveBehaviour : MonoBehaviour
     
     float[] force = new float[3];
     Vector3 forceDirection;
+    float totalDepth = 0.0f;
     float depth = 0.0f; 
     //When collision happens, set the force direction 
 	void OnCollisionEnter(Collision other)
@@ -31,6 +32,9 @@ public class MoveBehaviour : MonoBehaviour
 		forceDirection = Vector3.zero;
 		ContactPoint contactPoint = other.contacts[0];
 		Vector3 normal = contactPoint.normal;
+		Vector3 center = other.collider.bounds.center;
+		
+		totalDepth = (transform.position - center).magnitude;
         
         //unity has a left directional coordinate system, so the z direction is inverted for PHANToM
 		forceDirection.x = normal.x;
@@ -43,6 +47,7 @@ public class MoveBehaviour : MonoBehaviour
     float[] torque = {0.0f, 0.0f, 0.0f}; 
     RaycastHit hit;
     
+    float ratio = 0.0f;
     //When the haptic point is in the object
 	void OnCollisionStay(Collision other)
 	{
@@ -72,10 +77,11 @@ public class MoveBehaviour : MonoBehaviour
         if(overlapped)
         {                
             depth = (transform.position - center).magnitude;
-            //Debug.Log( "Depth: " + 1/depth);
-            force[0] = forceDirection.x*computeForce(Math.Abs(1/depth));  
-            force[1] = forceDirection.y*computeForce(Math.Abs(1/depth));
-            force[2] = forceDirection.z*computeForce(Math.Abs(1/depth));            
+            ratio = 1-((1/totalDepth)*depth);
+            //Debug.Log( "Depth ratio: " + ratio);
+            force[0] = forceDirection.x*computeForce(Mathf.Abs(ratio));  
+            force[1] = forceDirection.y*computeForce(Mathf.Abs(ratio));
+            force[2] = forceDirection.z*computeForce(Mathf.Abs(ratio));            
         }
         //Debug.Log("force: " + force[0] + ", " + force[1] + ", " + force[2]);
         talker.SendForceVector(force, torque);
@@ -83,13 +89,13 @@ public class MoveBehaviour : MonoBehaviour
 	
 	//how stiff should the wall be?
 	public float rigidyFactor;
+	public float maximumForce;
 	//Compute the actual force output in here
-	float computeForce(float distance)
+	float computeForce(float ratio)
 	{
-	    float force = rigidyFactor*distance;
-	    //We don't want to exceed the force so we limit it to 2.0 N/mm 
-	    //2.0 N/mm feels like a real wall for the most users
-	    return (force < 2.0f) ? force : 2.0f;
+	    float force = rigidyFactor*ratio;
+	    //We don't want to exceed the force so we limit it to some force 
+	    return (force < maximumForce) ? force : maximumForce;
 	}
 	
 	float[] zeroForce = {0.0f, 0.0f, 0.0f};

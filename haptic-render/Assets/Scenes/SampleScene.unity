@@ -439,7 +439,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6437ffe956f1bed61bd09fd54a593f02, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rigidyFactor: 0.5
+  rigidyFactor: 5
+  maximumForce: 3.5
 --- !u!54 &1388962008
 Rigidbody:
   m_ObjectHideFlags: 0
