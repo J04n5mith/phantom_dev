@@ -1,9 +1,3 @@
-//====================================
-//     Filename : HelloGhost.cpp
-//   Written by : Brandon Itkowitz
-//     Contains : Server
-// -----------------------------------
-
 #undef UNICODE
 #define WIN32_LEAN_AND_MEAN
 
