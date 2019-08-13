@@ -1,7 +1,0 @@
-Parsing Arguments...
-Arguments: 
-IP: 
-Error in VRML file gst_VET_NoFile Â on line -1
-Place the PHANToM in its reset position and press <ENTER>.
-Talking port: 44127
-Listening port: 50121
