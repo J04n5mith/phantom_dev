@@ -22,7 +22,6 @@ enum Operation {MOUSE_POS, GAMEOBJECT_POS, FORCE_TORQUE_ON, FORCE_USHORT=0xFFFF}
 class UnityListener  
 {
 private:
-	vector<double *> objects;
 	bool forcesOn;
 	double phantom_force[3];
 	double phantom_torque[3];
@@ -38,18 +37,14 @@ private:
 	unsigned short RECEIVER_PORT;
 
 	void deserializeForceAndTorque(char *recv_msg);
+	void dezerializeData(char* recv_msg);
+	int receiveProcessingData();
+	static unsigned int __stdcall receiverThread(void* p_this);
+	int Init();
 public:
 	UnityListener(char *server_ip, unsigned short port);
 	virtual ~UnityListener();
 	void startListening();
-	void initPositions(int number_of_objects, vector<double*> objectPositions);
-	double* getPosition(int id);
-	bool UnityListener::positionChanged(int id);
-	int Init();
-	int receiveProcessingData();
-	static unsigned int __stdcall receiverThread(void* p_this);
-	void dezerializeData(char* recv_msg);
-	void dezerializeGameObjectPos(char* recv_msg);
 	bool turnForcesOn();
 	double* getTorque();
 	double* getForce();

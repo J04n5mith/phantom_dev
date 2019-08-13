@@ -80,31 +80,6 @@ unsigned int __stdcall UnityListener::receiverThread(void* p_this)
     return 0;
 }
 
-
-
-void UnityListener::initPositions(int number_of_objects, vector<double*> objectPositions)
-{
-	pos = new ObjectPositions[number_of_objects];
-	for(int i = 0; i < objectPositions.size(); i++)
-	{
-		pos[i].id = i;
-		pos[i].position = objectPositions[i];
-		pos[i].hasChanged = false;
-		cout << "init position " << i << ": " 
-			<< pos[i].position[0] << ", " << pos[i].position[0] << ", " <<pos[i].position[0] << endl;
-	}
-}
-
-double* UnityListener::getPosition(int id)
-{
-	return pos[id].position;
-}
-
-bool UnityListener::positionChanged(int id)
-{
-	return pos[id].hasChanged;
-}
-
 int UnityListener::receiveProcessingData()
 {
 	char buffer[100];
@@ -157,66 +132,7 @@ void UnityListener::dezerializeData(char* recv_msg)
 		default:
 			printf("Incompatible Operation, Number: %d \n", oper);
 	}
-}
-
-
-//union
-union position_converter
-{
-   unsigned char buf[4];
-   float number;
-}position_converter[3];
-
-
-void UnityListener::dezerializeGameObjectPos(char *recv_msg)
-{
-	int id;
-
-	id = (recv_msg[2] << 24) | (recv_msg[3] << 16) | (recv_msg[4] << 8) | (recv_msg[5]);
-	position_converter[0].buf[0] = recv_msg[9];
-	position_converter[0].buf[1] = recv_msg[8];
-	position_converter[0].buf[2] = recv_msg[7];
-	position_converter[0].buf[3] = recv_msg[6];
-
-	position_converter[1].buf[0] = recv_msg[13];
-	position_converter[1].buf[1] = recv_msg[12];
-	position_converter[1].buf[2] = recv_msg[11];
-	position_converter[1].buf[3] = recv_msg[10];
-	
-	position_converter[2].buf[0] = recv_msg[17];
-	position_converter[2].buf[1] = recv_msg[16];
-	position_converter[2].buf[2] = recv_msg[15];
-	position_converter[2].buf[3] = recv_msg[14];
-
-
-	if( (pos[id].position[0] == (double)position_converter[0].number) &&
-		(pos[id].position[1] == (double)position_converter[1].number) &&
-		(pos[id].position[2] == (double)position_converter[2].number) )
-	{
-		//cout << id << " all false" << endl;
-		pos[id].hasChanged = false;
-		return;
-	}
-
-	if(pos[id].position[0] != (double)position_converter[0].number){
-		//cout << id << " x true" << endl;
-		pos[id].position[0] = (double)position_converter[0].number;
-		pos[id].hasChanged = true;
-	}
-
-
-	if(pos[id].position[1] != (double)position_converter[1].number){
-		//cout << id << " y true" << endl;
-		pos[id].position[1] = (double)position_converter[1].number;
-		pos[id].hasChanged = true;
-	}
-
-	if(pos[id].position[2] != (double)(-position_converter[2].number)){
-		//cout << id << " z true" << endl;
-		pos[id].position[2] = (double)(-position_converter[2].number);
-		pos[id].hasChanged = true;
-	}
-}
+}	
 
 union force
 {
